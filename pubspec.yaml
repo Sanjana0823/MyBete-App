@@ -68,7 +68,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-#    - assets/images/onboard_img_1.svg
+    - assets/fonts/
+
+
+  #    - assets/images/onboard_img_1.svg
 
   #   - images/a_dot_ham.jpeg
 
@@ -77,6 +80,15 @@ flutter:
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
+
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+
+
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
