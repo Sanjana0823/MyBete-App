@@ -15,13 +15,13 @@ class MyApp extends StatelessWidget {
         fontFamily: 'SF Pro Display',
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const FoodCategoryScreen(),
+      home: const FoodCategoryScreen(mealType: 'label',),
     );
   }
 }
 
 class FoodCategoryScreen extends StatelessWidget {
-  const FoodCategoryScreen({Key? key}) : super(key: key);
+  const FoodCategoryScreen({Key? key, required String mealType}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class FoodCategoryScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 children: [
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
 
                   // Select food category Title
                   const Text(
@@ -65,7 +65,7 @@ class FoodCategoryScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
 
                   // Food Categories Horizontal Scroller
                   SizedBox(
@@ -91,6 +91,21 @@ class FoodCategoryScreen extends StatelessWidget {
                         CategoryItem(
                           title: 'Grains',
                           imagePath: 'assets/grains.png',
+                          onTap: () {},
+                        ),
+                        CategoryItem(
+                          title: 'Dairy\nProducts',
+                          imagePath: 'assets/milk.png',
+                          onTap: () {},
+                        ),
+                        CategoryItem(
+                          title: 'Animal\nProtiens',
+                          imagePath: 'assets/meat.png',
+                          onTap: () {},
+                        ),
+                        CategoryItem(
+                          title: 'Beverages',
+                          imagePath: 'assets/wine.png',
                           onTap: () {},
                         ),
                       ],
@@ -143,6 +158,12 @@ class FoodCategoryScreen extends StatelessWidget {
                         ),
                         RecipeCard(
                           title: 'Overnight Oats with Peanut Butter & Banana',
+                          imagePath: 'assets/overnight_oats.jpg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Chia Seed Pudding',
                           imagePath: 'assets/overnight_oats.jpg',
                           isFavorite: false,
                           onTap: () {},

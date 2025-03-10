@@ -26,9 +26,9 @@ class _FullReportScreenState extends State<FullReportScreen> {
 
   Future<void> clearReports() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('reports'); // ✅ Remove reports from SharedPreferences
+    await prefs.remove('reports'); // Remove reports from SharedPreferences
     setState(() {
-      reports.clear(); // ✅ Clear reports from UI
+      reports.clear(); // Clear reports from UI
     });
   }
 
@@ -40,7 +40,7 @@ class _FullReportScreenState extends State<FullReportScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: clearReports, // 🔥 Clears the reports when clicked
+            onPressed: clearReports, //Clears the reports when clicked
             tooltip: 'Clear Reports',
           ),
         ],
@@ -76,7 +76,7 @@ class _FullReportScreenState extends State<FullReportScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: clearReports, // 🔥 Clears reports when clicked
+        onPressed: clearReports,
         child: Icon(Icons.delete),
         backgroundColor: Colors.red,
         tooltip: 'Clear All Reports',

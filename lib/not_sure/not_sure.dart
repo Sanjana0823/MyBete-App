@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import './symptom_levels/blurry_vision.dart';
-import './symptom_levels/frequent_urinary.dart';
-import './symptom_levels/more_tired.dart';
-import 'symptom_levels/nerones_damage_check/neurons_damage.dart';
-import './symptom_levels/numbness.dart';
-import './symptom_levels/period_changes.dart';
-import './symptom_levels/polydipsia.dart';
-import './symptom_levels/polyphagia.dart';
-import './symptom_levels/skin_changes.dart';
-import './symptom_levels/weight_changes.dart';
+import 'symptom_levels/6_blurry_vision_check/blurry_vision.dart';
+import 'symptom_levels/5_frequent_urinary_check/frequent_urinary.dart';
+import 'symptom_levels/7_feel_tired_check/more_tired.dart';
+import 'symptom_levels/2_nerones_damage_check/neurons_damage.dart';
+import 'symptom_levels/9_numbness_check/numbness.dart';
+import 'symptom_levels/10_period_check/period_changes.dart';
+import 'symptom_levels/1_polydipsia_check/polydipsia.dart';
+import 'symptom_levels/3_polyphagia_check/polyphagia.dart';
+import 'symptom_levels/8_skin_changes_check/skin_changes.dart';
+import 'symptom_levels/4_weight_changes_check/weight_changes.dart';
 
 class NotSureDashboard extends StatelessWidget {
   final List<String> symptoms = [

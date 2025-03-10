@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mybete_app/not_sure/symptom_levels/nerones_damage_check/fast_test.dart';
+import 'package:mybete_app/not_sure/symptom_levels/2_nerones_damage_check/fast_test.dart';
 
 class Symptom2Screen extends StatelessWidget {
   @override

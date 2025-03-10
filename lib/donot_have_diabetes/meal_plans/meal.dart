@@ -210,6 +210,7 @@ class MealPlannerScreen extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
+
                       // Horizontal Meal Cards
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -218,28 +219,28 @@ class MealPlannerScreen extends StatelessWidget {
                             // Breakfast Card
                             _mealCard(
                               context,
-                              imageUrl: 'assets/images/meal_images/breakfast.jpg',
+                              imageUrl: 'lib/donot_have_diabetes/meal_plans/meal images/breakfast.jpg',
                               label: 'Breakfast',
                             ),
                             const SizedBox(width: 16),
                             // Lunch Card
                             _mealCard(
                               context,
-                              imageUrl: 'assets/images/meal_images/lunch.jpg',
+                              imageUrl: 'donot_have_diabetes/meal_plans/meal images/lunch.jpg',
                               label: 'Lunch',
                             ),
                             const SizedBox(width: 16),
                             // Dinner Card
                             _mealCard(
                               context,
-                              imageUrl: 'assets/images/meal_images/dinner.jpg',
+                              imageUrl: 'donot_have_diabetes/meal_plans/meal images/dinner.jpg',
                               label: 'Dinner',
                             ),
                             const SizedBox(width: 16),
                             // Snack Card
                             _mealCard(
                               context,
-                              imageUrl: 'assets/images/meal_images/snack.jpg',
+                              imageUrl: 'donot_have_diabetes/meal_plans/meal images/snack.jpg',
                               label: 'Snack',
                             ),
                           ],
@@ -247,7 +248,8 @@ class MealPlannerScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 24),
-                    ],
+
+                ],
                   ),
                 ),
               ),
@@ -361,24 +363,6 @@ class MealPlannerScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class FoodCategoryScreen extends StatelessWidget {
-  final String mealType;
-
-  const FoodCategoryScreen({Key? key, required this.mealType}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('$mealType Meals'),
-      ),
-      body: Center(
-        child: Text('Details for $mealType meals', style: TextStyle(fontSize: 24)),
       ),
     );
   }
