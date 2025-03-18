@@ -15,3 +15,4 @@ class Exercise extends StatelessWidget {
     );
   }
 }
+

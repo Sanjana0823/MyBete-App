@@ -1,0 +1,2 @@
+C:/Users/sanja/AndroidStudioProjects/mybete_app/android/app/.cxx/RelWithDebInfo/e721474w/x86/CMakeFiles/edit_cache.dir
+C:/Users/sanja/AndroidStudioProjects/mybete_app/android/app/.cxx/RelWithDebInfo/e721474w/x86/CMakeFiles/rebuild_cache.dir

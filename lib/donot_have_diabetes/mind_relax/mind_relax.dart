@@ -4,6 +4,7 @@ import 'package:mybete_app/donot_have_diabetes/mind_relax/quiz.dart';
 import 'package:mybete_app/donot_have_diabetes/Fitness/exercise.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/meal.dart';
+import 'package:mybete_app/donot_have_diabetes/mind_relax/music.dart';
 
 void main() {
   runApp(const MindRelaxDashboard());
@@ -110,8 +111,16 @@ class _HomePageState extends State<HomePage> {
                 description:
                     'Meditation and relaxing music can help reduce stress, improve focus, and promote a sense of calm for better well-being.',
                 buttonText: 'Get Start',
-                
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            music()), // Navigate to Sleep screen
+                  );
+                },
               ),
+              
               const SizedBox(height: 20),
             ],
           ),
