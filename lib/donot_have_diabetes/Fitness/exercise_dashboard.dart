@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'step_counter.dart'; // Import StepCounterPage
+import 'yoga_session_page.dart'; // Import YogaSessionPage
+import 'strength_toning_page.dart'; // Import StrengthToningPage
+import 'cardio_workout_page.dart'; // Import CardioWorkoutPage
 
 class ExerciseDashboard extends StatelessWidget {
   final List<ExerciseCategory> categories = [
@@ -18,7 +22,7 @@ class ExerciseDashboard extends StatelessWidget {
       type: ExerciseType.yoga,
     ),
     ExerciseCategory(
-      title: 'Strength Training',
+      title: 'Strength & Toning',
       icon: Icons.fitness_center,
       type: ExerciseType.strength,
     ),
@@ -27,12 +31,10 @@ class ExerciseDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Fitness Program'),
-      ),
+      appBar: AppBar(title: const Text('Fitness Program')),
       body: GridView.builder(
-        padding: EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
@@ -48,12 +50,27 @@ class ExerciseDashboard extends StatelessWidget {
   }
 
   void _navigateToExercise(BuildContext context, ExerciseCategory category) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ExerciseDetailScreen(category: category),
-      ),
-    );
+    if (category.type == ExerciseType.steps) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StepCounterPage()),
+      );
+    } else if (category.type == ExerciseType.cardio) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CardioWorkoutPage()),
+      );
+    } else if (category.type == ExerciseType.yoga) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const YogaSessionPage()),
+      );
+    } else if (category.type == ExerciseType.strength) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StrengthToningPage()),
+      );
+    }
   }
 }
 
@@ -75,10 +92,7 @@ class ExerciseCategoryCard extends StatelessWidget {
   final ExerciseCategory category;
   final VoidCallback onTap;
 
-  const ExerciseCategoryCard({
-    required this.category,
-    required this.onTap,
-  });
+  const ExerciseCategoryCard({required this.category, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -91,66 +105,13 @@ class ExerciseCategoryCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(category.icon, size: 48, color: Colors.blue),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               category.title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class ExerciseDetailScreen extends StatelessWidget {
-  final ExerciseCategory category;
-
-  const ExerciseDetailScreen({required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(category.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(category.icon, size: 64, color: Colors.blue),
-            SizedBox(height: 24),
-            Text(
-              'Start Your ${category.title}',
-              style: TextStyle(fontSize: 24),
-            ),
-            SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () => _startExercise(context),
-              child: Text('Begin Session'),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _startExercise(BuildContext context) {
-    // Add specific exercise tracking logic here
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Exercise Started'),
-        content: Text('Tracking your ${category.title}...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
-          ),
-        ],
       ),
     );
   }

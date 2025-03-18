@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/oatmeal.dart';
 import 'vegetables.dart';
 import 'fruits.dart';
+import 'bakery.dart';
+import 'grains.dart';
+import 'Animal.dart';
 
 
 void main() {
@@ -115,6 +118,10 @@ class FoodCategoryScreen extends StatelessWidget {
                           title: 'Bakery Items',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cake.png',
                           onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const BakeryItemsScreen()),
+                            );
 
                           },
                         ),
@@ -122,6 +129,10 @@ class FoodCategoryScreen extends StatelessWidget {
                           title: 'Grains',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/grains.png',
                           onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const GrainsScreen()),
+                            );
 
                           },
                         ),
@@ -136,6 +147,10 @@ class FoodCategoryScreen extends StatelessWidget {
                           title: 'Animal\nProtiens',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/protein.png',
                           onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AnimalProteinsScreen()),
+                            );
 
                           },
                         ),
@@ -215,37 +230,43 @@ class FoodCategoryScreen extends StatelessWidget {
                         ),
                         RecipeCard(
                           title: 'Chia Seed Pudding',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chia_pudding.png',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Chia Seed Pudding Recipe - Belly Full.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
-                          title: 'Chia Seed Pudding',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chia_pudding.png',
+                          title: 'Green Smoothie',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spinach Smoothie.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
-                          title: 'Chia Seed Pudding',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chia_pudding.png',
+                          title: 'Whole Grain Avocado Toast',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Creamy Avocado Toast with a Twist.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
-                          title: 'Chia Seed Pudding',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chia_pudding.png',
+                          title: 'Quinoa Breakfast Bowl',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Summer Quinoa Breakfast Bowls.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
-                          title: 'Chia Seed Pudding',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chia_pudding.png',
+                          title: 'Banana Pancakes (No Flour!)',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/banana_pancake.png',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
-                          title: 'Chia Seed Pudding',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chia_pudding.png',
+                          title: 'Tofu Scramble(Vegan Egg Alternative)',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Tofu Scramble.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Banana Smoothie Bowl',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Banana Smoothie Bowl.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
@@ -281,7 +302,7 @@ class FoodCategoryScreen extends StatelessWidget {
                         ),
                         RecipeCard(
                           title: 'Lentil & Vegetable Soup',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/lentil_soup.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/lentil_soup.png',
                           isFavorite: false,
                           onTap: () {},
                         ),
@@ -291,6 +312,50 @@ class FoodCategoryScreen extends StatelessWidget {
                           isFavorite: false,
                           onTap: () {},
                         ),
+                        RecipeCard(
+                          title: 'Baked Salmon with Steamed Vegetables',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/baked_salmon_vege.png',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Veggie Stir-Fry with Brown Rice',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/brown_rice.png',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Tuna & Avocado Salad',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Chicago-Style Tuna Salad.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: ' Mediterranean Chickpea Salad',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Mediterranean Chickpea Salad (15 minute recipe!) _ Choosing Chia.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Baked Sweet Potato with Black Beans',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Baked Sweet Potato with Black Beans.png',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+
+                        RecipeCard(
+                          title: 'Shrimp & Avocado Salad',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Shrimp & Avocado Salad.png',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Spaghetti Squash with Tomato Sauce',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+
                       ],
                     ),
                   ),
@@ -317,19 +382,61 @@ class FoodCategoryScreen extends StatelessWidget {
                       children: [
                         RecipeCard(
                           title: 'Stuffed Bell Peppers',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/stuffed_peppers.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/stuffed_peppers.png',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
                           title: 'Baked Cod with Roasted Vegetables',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/baked_cod.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Baked Cod with Quinoa and Vegetables.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
                           title: 'Lemon Garlic Shrimp with Asparagus',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/shrimp.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Lemon Garlic Shrimp Pasta Recipe with Asparagus.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Grilled Veggie Skewers with Quinoa',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Easy Tofu Skewers (Grill or Oven!) - Two Spoons.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Cauliflower Fried Rice',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Cauliflower Fried Rice.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Grilled Chicken with Mango Salsa',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Refreshing grilled chicken with sweet mango salsa.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Spaghetti Squash Primavera',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg ',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Baked Lemon Herb Chicken with Broccoli',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/baked_lemon.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Quinoa and Roasted Vegetable Bowl',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Healthy Quinoa Salad with Roasted Vegetables - Gluten-Free & Delicious Recipe!.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Veggie-Packed Cauliflower Crust Pizza',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Cauliflower Crust Pizza.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
@@ -359,19 +466,43 @@ class FoodCategoryScreen extends StatelessWidget {
                       children: [
                         RecipeCard(
                           title: 'Banana with Peanut Butter',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/banana_pb.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Peanut Butter Banana Bites.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
                           title: 'Greek Yogurt and Honey',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/greek_yogurt.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Greek Yogurt and Berries.jpeg',
                           isFavorite: false,
                           onTap: () {},
                         ),
                         RecipeCard(
                           title: 'Carrot Sticks with Hummus',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/carrot_hummus.jpg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Veggie Sticks & Hummus.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Cucumber with Lemon and Salt',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Easy Simple Green Salad.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Rice Cake with Nut Butter',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Rice Cake .png',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Mixed Nuts',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Healthy Trail Mix.jpeg',
+                          isFavorite: false,
+                          onTap: () {},
+                        ),
+                        RecipeCard(
+                          title: 'Cheese and Crackers',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cheese crackers.png',
                           isFavorite: false,
                           onTap: () {},
                         ),

@@ -42,3 +42,33 @@ Widget _buildIntroductionCard() {
     ),
   );
 }
+
+Widget _buildWorkoutGuidelines() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text('Training Principles:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 16),
+      _buildGuidelineItem(Icons.repeat, '3-4 sets of 8-12 reps'),
+      _buildGuidelineItem(Icons.timer, '60-90 seconds rest between sets'),
+      _buildGuidelineItem(Icons.speed, 'Controlled movement tempo'),
+      _buildGuidelineItem(Icons.warning, 'Maintain proper form'),
+    ],
+  );
+}
+
+
+
+Widget _buildGuidelineItem(IconData icon, String text) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      children: [
+        Icon(icon, color: Colors.lightBlue),
+        const SizedBox(width: 16),
+        Expanded(child: Text(text)),
+      ],
+    ),
+  );
+}
+

@@ -1,0 +1,2 @@
+C:/Users/Acer/StudioProjects/New App/MyBete-App/android/app/.cxx/Debug/4k326327/x86/CMakeFiles/edit_cache.dir
+C:/Users/Acer/StudioProjects/New App/MyBete-App/android/app/.cxx/Debug/4k326327/x86/CMakeFiles/rebuild_cache.dir

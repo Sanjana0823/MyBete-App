@@ -2,27 +2,62 @@ C/C++ Structured Log|
 z
 xC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\additional_project_files.txtC
 A
-?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	ªŞÅîØ2 ÏÒáàØ2y
+<<<<<<< Updated upstream
+<<<<<<< HEAD
+?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	²÷ÍÛØ2 ¸¹ı×2y
 w
-uC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\android_gradle_build.json	ªŞÅîØ2Ù æÒáàØ2~
+uC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\android_gradle_build.json	²÷ÍÛØ2Ù ½¹ı×2~
 |
-zC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\android_gradle_build_mini.json	ªŞÅîØ2¶ —ÓáàØ2k
+zC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\android_gradle_build_mini.json	²÷ÍÛØ2¶ Æ¹ı×2k
 i
-gC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build.ninja	ªŞÅîØ2»Ó èÏáàØ2o
+gC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build.ninja	²÷ÍÛØ2»Ó êœ¹ı×2o
 m
-kC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build.ninja.txt	ªŞÅîØ2t
+kC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build.ninja.txt	²÷ÍÛØ2t
 r
-pC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build_file_index.txt	ªŞÅîØ2R £ÓáàØ2u
+pC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build_file_index.txt	²÷ÍÛØ2R Ö¹ı×2u
 s
-qC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\compile_commands.json	ªŞÅîØ2y
+qC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\compile_commands.json	³÷ÍÛØ2y
 w
-uC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\compile_commands.json.bin	ªŞÅîØ2	
+uC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\compile_commands.json.bin	³÷ÍÛØ2	
 }
-{C:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\metadata_generation_command.txt	ªŞÅîØ2
+{C:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\metadata_generation_command.txt	³÷ÍÛØ2
+ı Ï¹ı×2r
+p
+nC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\prefab_config.json	³÷ÍÛØ2( Ğ¹ı×2w
+u
+sC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\symbol_folder_index.txt	³÷ÍÛØ2j Ó¹ı×2V
+T
+RC:\Users\Acer\flutter\packages\flutter_tools\gradle\src\main\groovy\CMakeLists.txt	³÷ÍÛØ2§ şÆÙêÕ2
+=======
+?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	ªŞÅîØ2 ÏÒáàØ2y
+=======
+?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	ÅÒÅöØ2 ÏÒáàØ2y
+>>>>>>> Stashed changes
+w
+uC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\android_gradle_build.json	ÅÒÅöØ2Ù æÒáàØ2~
+|
+zC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\android_gradle_build_mini.json	ÅÒÅöØ2¶ —ÓáàØ2k
+i
+gC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build.ninja	ÅÒÅöØ2»Ó èÏáàØ2o
+m
+kC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build.ninja.txt	ÅÒÅöØ2t
+r
+pC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\build_file_index.txt	ÅÒÅöØ2R £ÓáàØ2u
+s
+qC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\compile_commands.json	ÅÒÅöØ2y
+w
+uC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\compile_commands.json.bin	ÅÒÅöØ2	
+}
+{C:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\metadata_generation_command.txt	ÅÒÅöØ2
 ı šÓáàØ2r
 p
-nC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\prefab_config.json	ªŞÅîØ2( œÓáàØ2w
+nC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\prefab_config.json	ÅÒÅöØ2( œÓáàØ2w
 u
-sC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\symbol_folder_index.txt	ªŞÅîØ2j ÓáàØ2V
+sC:\Users\Acer\StudioProjects\New App\MyBete-App\android\app\.cxx\Debug\4s3n201q\armeabi-v7a\symbol_folder_index.txt	ÅÒÅöØ2j ÓáàØ2V
 T
+<<<<<<< Updated upstream
 RC:\Users\Acer\flutter\packages\flutter_tools\gradle\src\main\groovy\CMakeLists.txt	ªŞÅîØ2§ şÆÙêÕ2
+>>>>>>> 431e12ddf825d797a4649081f1a86d40a0d96f2a
+=======
+RC:\Users\Acer\flutter\packages\flutter_tools\gradle\src\main\groovy\CMakeLists.txt	ÅÒÅöØ2§ şÆÙêÕ2
+>>>>>>> Stashed changes
