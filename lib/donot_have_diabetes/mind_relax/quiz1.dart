@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz2.dart'; // Import Quiz2
+import 'package:mybete_app/donot_have_diabetes/mind_relax/result_screen.dart';
 
 void main() {
   runApp(const Quiz1());
@@ -47,17 +48,19 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    
+
                     // Back & Skip Button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.black),
+                          icon:
+                              const Icon(Icons.arrow_back, color: Colors.black),
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const Quiz()),
+                              MaterialPageRoute(
+                                  builder: (context) => const Quiz()),
                             );
                           },
                         ),
@@ -65,7 +68,8 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const Quiz2()),
+                              MaterialPageRoute(
+                                  builder: (context) => const Quiz2()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -74,61 +78,70 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
                           child: const Text(
                             'Skip',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Title
                     const Padding(
                       padding: EdgeInsets.only(left: 16.0),
                       child: Text(
                         'Mood & Well-being Check',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Questions
                     QuestionCard(
                       question: '1. How are you feeling today?',
                       options: ['Happy', 'Stressed', 'Anxious', 'Calm'],
                       selectedValue: selectedMood,
-                      onSelected: (value) => setState(() => selectedMood = value),
+                      onSelected: (value) =>
+                          setState(() => selectedMood = value),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     QuestionCard(
                       question: '2. What\'s your stress level right now?',
                       options: ['Low', 'Medium', 'High'],
                       selectedValue: selectedStressLevel,
-                      onSelected: (value) => setState(() => selectedStressLevel = value),
+                      onSelected: (value) =>
+                          setState(() => selectedStressLevel = value),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     QuestionCard(
-                      question: '3. What\'s one thing you\'re grateful for today?',
+                      question:
+                          '3. What\'s one thing you\'re grateful for today?',
                       options: ['Family', 'Health', 'Friends', 'Work'],
                       selectedValue: selectedGratitude,
-                      onSelected: (value) => setState(() => selectedGratitude = value),
+                      onSelected: (value) =>
+                          setState(() => selectedGratitude = value),
                     ),
-                    
+
                     const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
-            
+
             // Next Button
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -136,9 +149,20 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    // Create a map of the answers
+                    final quiz1Answers = {
+                      'selectedMood': selectedMood,
+                      'selectedStressLevel': selectedStressLevel,
+                      'selectedGratitude': selectedGratitude,
+                    };
+
+                    // Navigate to Quiz2 with the answers
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Quiz2()),
+                      MaterialPageRoute(
+                        builder: (context) => const Quiz2(),
+                        settings: RouteSettings(arguments: quiz1Answers),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -190,7 +214,8 @@ class QuestionCard extends StatelessWidget {
           Text(
             question,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+            style: const TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
           ),
           const SizedBox(height: 16),
           ...options.map((option) => RadioListTile<String>(

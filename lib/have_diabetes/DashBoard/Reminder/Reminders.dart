@@ -1,515 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:timezone/timezone.dart' as tz;
-// import 'package:timezone/data/latest.dart' as tz_init;
-// import 'dart:async';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'dart:convert';
-//
-// // Model class for Reminder
-// class Reminder {
-//   String id;
-//   String title;
-//   DateTime? reminderDate;
-//   TimeOfDay reminderTime;
-//   String note;
-//   bool isOneTime;
-//   bool isDaily;
-//   bool isCustom;
-//   bool neverEnds;
-//   DateTime? startsOn;
-//   DateTime? endsOn;
-//   bool isEnabled;
-//
-//   Reminder({
-//     required this.id,
-//     required this.title,
-//     this.reminderDate,
-//     required this.reminderTime,
-//     this.note = '',
-//     required this.isOneTime,
-//     this.isDaily = false,
-//     this.isCustom = false,
-//     this.neverEnds = true,
-//     this.startsOn,
-//     this.endsOn,
-//     this.isEnabled = true,
-//   });
-//
-//   // Convert to map for storage
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'id': id,
-//       'title': title,
-//       'reminderDate': reminderDate?.toIso8601String(),
-//       'reminderTime': '${reminderTime.hour}:${reminderTime.minute}',
-//       'note': note,
-//       'isOneTime': isOneTime,
-//       'isDaily': isDaily,
-//       'isCustom': isCustom,
-//       'neverEnds': neverEnds,
-//       'startsOn': startsOn?.toIso8601String(),
-//       'endsOn': endsOn?.toIso8601String(),
-//       'isEnabled': isEnabled,
-//     };
-//   }
-//
-//   // Create from stored map
-//   factory Reminder.fromJson(Map<String, dynamic> json) {
-//     final timeParts = json['reminderTime'].split(':');
-//     return Reminder(
-//       id: json['id'],
-//       title: json['title'],
-//       reminderDate: json['reminderDate'] != null
-//           ? DateTime.parse(json['reminderDate'])
-//           : null,
-//       reminderTime: TimeOfDay(
-//         hour: int.parse(timeParts[0]),
-//         minute: int.parse(timeParts[1]),
-//       ),
-//       note: json['note'] ?? '',
-//       isOneTime: json['isOneTime'],
-//       isDaily: json['isDaily'] ?? false,
-//       isCustom: json['isCustom'] ?? false,
-//       neverEnds: json['neverEnds'] ?? true,
-//       startsOn: json['startsOn'] != null
-//           ? DateTime.parse(json['startsOn'])
-//           : null,
-//       endsOn: json['endsOn'] != null ? DateTime.parse(json['endsOn']) : null,
-//       isEnabled: json['isEnabled'] ?? true,
-//     );
-//   }
-// }
-//
-// // Notification Service
-// class NotificationService {
-//   static final NotificationService _instance = NotificationService._internal();
-//   factory NotificationService() => _instance;
-//   NotificationService._internal();
-//
-//   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-//   FlutterLocalNotificationsPlugin();
-//
-//   Future<void> init() async {
-//     tz_init.initializeTimeZones();
-//
-//     const AndroidInitializationSettings initializationSettingsAndroid =
-//     AndroidInitializationSettings('@mipmap/ic_launcher');
-//
-//     final DarwinInitializationSettings initializationSettingsIOS =
-//     DarwinInitializationSettings(
-//       requestSoundPermission: false,
-//       requestBadgePermission: false,
-//       requestAlertPermission: false,
-//     );
-//
-//     final InitializationSettings initializationSettings = InitializationSettings(
-//       android: initializationSettingsAndroid,
-//       iOS: initializationSettingsIOS,
-//     );
-//
-//     await flutterLocalNotificationsPlugin.initialize(
-//       initializationSettings,
-//     );
-//   }
-//
-//   Future<void> scheduleNotification(Reminder reminder) async {
-//     if (!reminder.isEnabled) return;
-//
-//     // Cancel existing notifications for this reminder
-//     await flutterLocalNotificationsPlugin.cancel(reminder.id.hashCode);
-//
-//     if (reminder.isOneTime) {
-//       // Handle one-time reminder
-//       if (reminder.reminderDate != null) {
-//         final scheduledDate = DateTime(
-//           reminder.reminderDate!.year,
-//           reminder.reminderDate!.month,
-//           reminder.reminderDate!.day,
-//           reminder.reminderTime.hour,
-//           reminder.reminderTime.minute,
-//         );
-//
-//         if (scheduledDate.isAfter(DateTime.now())) {
-//           await _scheduleNotification(
-//             id: reminder.id.hashCode,
-//             title: reminder.title,
-//             body: reminder.note,
-//             scheduledDate: scheduledDate,
-//           );
-//         }
-//       }
-//     } else if (reminder.isDaily) {
-//       // Handle daily reminder
-//       final now = DateTime.now();
-//       final today = DateTime(
-//         now.year,
-//         now.month,
-//         now.day,
-//         reminder.reminderTime.hour,
-//         reminder.reminderTime.minute,
-//       );
-//
-//       DateTime scheduledDate = today;
-//       if (today.isBefore(now)) {
-//         scheduledDate = today.add(const Duration(days: 1));
-//       }
-//
-//       await _scheduleDailyNotification(
-//         id: reminder.id.hashCode,
-//         title: reminder.title,
-//         body: reminder.note,
-//         scheduledTime: TimeOfDay(
-//           hour: reminder.reminderTime.hour,
-//           minute: reminder.reminderTime.minute,
-//         ),
-//       );
-//     } else if (reminder.isCustom) {
-//       // Handle custom reminder
-//       if (reminder.startsOn != null) {
-//         final startDate = DateTime(
-//           reminder.startsOn!.year,
-//           reminder.startsOn!.month,
-//           reminder.startsOn!.day,
-//           reminder.reminderTime.hour,
-//           reminder.reminderTime.minute,
-//         );
-//
-//         if (!reminder.neverEnds && reminder.endsOn != null) {
-//           // Custom with end date
-//           final endDate = DateTime(
-//             reminder.endsOn!.year,
-//             reminder.endsOn!.month,
-//             reminder.endsOn!.day,
-//             23, 59, 59,
-//           );
-//
-//           if (startDate.isAfter(DateTime.now()) && startDate.isBefore(endDate)) {
-//             await _scheduleCustomNotification(
-//               id: reminder.id.hashCode,
-//               title: reminder.title,
-//               body: reminder.note,
-//               startDate: startDate,
-//               endDate: endDate,
-//             );
-//           }
-//         } else {
-//           // Custom without end date (never ends)
-//           if (startDate.isAfter(DateTime.now())) {
-//             await _scheduleDailyNotification(
-//               id: reminder.id.hashCode,
-//               title: reminder.title,
-//               body: reminder.note,
-//               scheduledTime: TimeOfDay(
-//                 hour: reminder.reminderTime.hour,
-//                 minute: reminder.reminderTime.minute,
-//               ),
-//               startDate: startDate,
-//             );
-//           }
-//         }
-//       }
-//     }
-//   }
-//
-//   Future<void> _scheduleNotification({
-//     required int id,
-//     required String title,
-//     required String body,
-//     required DateTime scheduledDate,
-//   }) async {
-//     await flutterLocalNotificationsPlugin.zonedSchedule(
-//       id,
-//       title,
-//       body,
-//       tz.TZDateTime.from(scheduledDate, tz.local),
-//       const NotificationDetails(
-//         android: AndroidNotificationDetails(
-//           'reminder_channel',
-//           'Reminder Notifications',
-//           channelDescription: 'Notifications for MyBete reminders',
-//           importance: Importance.high,
-//           priority: Priority.high,
-//         ),
-//         iOS: DarwinNotificationDetails(),
-//       ),
-//       androidAllowWhileIdle: true,
-//       uiLocalNotificationDateInterpretation:
-//       UILocalNotificationDateInterpretation.absoluteTime,
-//     );
-//   }
-//
-//   Future<void> _scheduleDailyNotification({
-//     required int id,
-//     required String title,
-//     required String body,
-//     required TimeOfDay scheduledTime,
-//     DateTime? startDate,
-//   }) async {
-//     DateTime firstDate = startDate ?? DateTime.now();
-//     if (startDate == null) {
-//       final now = DateTime.now();
-//       firstDate = DateTime(
-//         now.year,
-//         now.month,
-//         now.day,
-//         scheduledTime.hour,
-//         scheduledTime.minute,
-//       );
-//
-//       if (firstDate.isBefore(now)) {
-//         firstDate = firstDate.add(const Duration(days: 1));
-//       }
-//     }
-//
-//     await flutterLocalNotificationsPlugin.zonedSchedule(
-//       id,
-//       title,
-//       body,
-//       tz.TZDateTime.from(firstDate, tz.local),
-//       const NotificationDetails(
-//         android: AndroidNotificationDetails(
-//           'daily_reminder_channel',
-//           'Daily Reminder Notifications',
-//           channelDescription: 'Daily notifications for MyBete reminders',
-//           importance: Importance.high,
-//           priority: Priority.high,
-//         ),
-//         iOS: DarwinNotificationDetails(),
-//       ),
-//       androidAllowWhileIdle: true,
-//       uiLocalNotificationDateInterpretation:
-//       UILocalNotificationDateInterpretation.absoluteTime,
-//       matchDateTimeComponents: DateTimeComponents.time,
-//     );
-//   }
-//
-//   Future<void> _scheduleCustomNotification({
-//     required int id,
-//     required String title,
-//     required String body,
-//     required DateTime startDate,
-//     required DateTime endDate,
-//   }) async {
-//     // This is a simplified version. In a real app, you might need to handle
-//     // more complex recurring patterns based on your requirements
-//     await flutterLocalNotificationsPlugin.zonedSchedule(
-//       id,
-//       title,
-//       body,
-//       tz.TZDateTime.from(startDate, tz.local),
-//       const NotificationDetails(
-//         android: AndroidNotificationDetails(
-//           'custom_reminder_channel',
-//           'Custom Reminder Notifications',
-//           channelDescription: 'Custom notifications for MyBete reminders',
-//           importance: Importance.high,
-//           priority: Priority.high,
-//         ),
-//         iOS: DarwinNotificationDetails(),
-//       ),
-//       androidAllowWhileIdle: true,
-//       uiLocalNotificationDateInterpretation:
-//       UILocalNotificationDateInterpretation.absoluteTime,
-//     );
-//   }
-//
-//   Future<void> cancelNotification(int id) async {
-//     await flutterLocalNotificationsPlugin.cancel(id);
-//   }
-//
-//   Future<void> cancelAllNotifications() async {
-//     await flutterLocalNotificationsPlugin.cancelAll();
-//   }
-// }
-//
-// // Reminder Storage Service
-// class ReminderStorageService {
-//   static const String _remindersKey = 'myBete_reminders';
-//
-//   // Save reminders to local storage
-//   Future<void> saveReminders(List<Reminder> reminders) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final reminderJsonList = reminders.map((r) => r.toJson()).toList();
-//     await prefs.setString(_remindersKey, jsonEncode(reminderJsonList));
-//   }
-//
-//   // Load reminders from local storage
-//   Future<List<Reminder>> loadReminders() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final remindersJson = prefs.getString(_remindersKey);
-//
-//     if (remindersJson == null || remindersJson.isEmpty) {
-//       return [];
-//     }
-//
-//     try {
-//       final List<dynamic> decodedList = jsonDecode(remindersJson);
-//       return decodedList
-//           .map((item) => Reminder.fromJson(item))
-//           .toList();
-//     } catch (e) {
-//       print('Error loading reminders: $e');
-//       return [];
-//     }
-//   }
-//
-//   // Add a new reminder
-//   Future<void> addReminder(Reminder reminder) async {
-//     final reminders = await loadReminders();
-//     reminders.add(reminder);
-//     await saveReminders(reminders);
-//
-//     // Schedule the notification
-//     final notificationService = NotificationService();
-//     await notificationService.scheduleNotification(reminder);
-//   }
-//
-//   // Update an existing reminder
-//   Future<void> updateReminder(Reminder updatedReminder) async {
-//     final reminders = await loadReminders();
-//     final index = reminders.indexWhere((r) => r.id == updatedReminder.id);
-//
-//     if (index != -1) {
-//       reminders[index] = updatedReminder;
-//       await saveReminders(reminders);
-//
-//       // Re-schedule the notification
-//       final notificationService = NotificationService();
-//       await notificationService.cancelNotification(updatedReminder.id.hashCode);
-//       await notificationService.scheduleNotification(updatedReminder);
-//     }
-//   }
-//
-//   // Delete a reminder
-//   Future<void> deleteReminder(String id) async {
-//     final reminders = await loadReminders();
-//     reminders.removeWhere((r) => r.id == id);
-//     await saveReminders(reminders);
-//
-//     // Cancel notification
-//     final notificationService = NotificationService();
-//     await notificationService.cancelNotification(id.hashCode);
-//   }
-//
-//   // Toggle reminder enabled state
-//   Future<void> toggleReminderEnabled(String id) async {
-//     final reminders = await loadReminders();
-//     final index = reminders.indexWhere((r) => r.id == id);
-//
-//     if (index != -1) {
-//       reminders[index].isEnabled = !reminders[index].isEnabled;
-//       await saveReminders(reminders);
-//
-//       // Handle notification
-//       final notificationService = NotificationService();
-//       if (reminders[index].isEnabled) {
-//         await notificationService.scheduleNotification(reminders[index]);
-//       } else {
-//         await notificationService.cancelNotification(id.hashCode);
-//       }
-//     }
-//   }
-// }
-//
-// // Main Reminders List Screen
-// class RemindersScreen extends StatefulWidget {
-//   const RemindersScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   _RemindersScreenState createState() => _RemindersScreenState();
-// }
-//
-// class _RemindersScreenState extends State<RemindersScreen> {
-//   final ReminderStorageService _storageService = ReminderStorageService();
-//   final List<Reminder> _reminders = [];
-//   bool _isSearching = false;
-//   final TextEditingController _searchController = TextEditingController();
-//   List<Reminder> _filteredReminders = [];
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _loadReminders();
-//     // Initialize notification service
-//     NotificationService().init();
-//   }
-//
-//   Future<void> _loadReminders() async {
-//     final reminders = await _storageService.loadReminders();
-//     setState(() {
-//       _reminders.clear();
-//       _reminders.addAll(reminders);
-//       _filterReminders();
-//     });
-//   }
-//
-//   void _filterReminders() {
-//     if (_searchController.text.isEmpty) {
-//       _filteredReminders = List.from(_reminders);
-//     } else {
-//       _filteredReminders = _reminders
-//           .where((reminder) =>
-//           reminder.title.toLowerCase().contains(_searchController.text.toLowerCase()))
-//           .toList();
-//     }
-//   }
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     @override
-//     Widget build(BuildContext context) {
-//       return Scaffold(
-//         appBar: AppBar(
-//           title: const Text('Reminders'),
-//           actions: [
-//             IconButton(
-//               icon: const Icon(Icons.search),
-//               onPressed: () {
-//                 setState(() {
-//                   _isSearching = !_isSearching;
-//                   if (!_isSearching) {
-//                     _searchController.clear();
-//                     _filterReminders();
-//                   }
-//                 });
-//               },
-//             ),
-//           ],
-//         ),
-//         body: ListView.builder(
-//           itemCount: _filteredReminders.length,
-//           itemBuilder: (context, index) {
-//             final reminder = _filteredReminders[index];
-//             return ListTile(
-//               title: Text(reminder.title),
-//               subtitle: Text(reminder.note),
-//               trailing: Switch(
-//                 value: reminder.isEnabled,
-//                 onChanged: (value) async {
-//                   await _storageService.toggleReminderEnabled(reminder.id);
-//                   _loadReminders();
-//                 },
-//               ),
-//             );
-//           },
-//         ),
-//         floatingActionButton: FloatingActionButton(
-//           onPressed: () {
-//             // Navigate to add reminder screen (implement navigation logic)
-//           },
-//           child: const Icon(Icons.add),
-//         ),
-//       );
-//     }
-//     throw UnimplementedError();
-//   }
-// }
-
-
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -1089,17 +577,28 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
     // Initialize with values from initialReminder or defaults
     reminderType = widget.initialReminder?.type ?? 'one-time';
     repeatType = widget.initialReminder?.repeatType ?? 'daily';
-    titleController = TextEditingController(text: widget.initialReminder?.title ?? '');
+    titleController =
+        TextEditingController(text: widget.initialReminder?.title ?? '');
     dateValue = widget.initialReminder?.date ?? DateTime.now();
 
     // Initialize time
-    final initialTime = widget.initialReminder?.time ?? '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
+    final initialTime = widget.initialReminder?.time ?? '${TimeOfDay
+        .now()
+        .hour
+        .toString()
+        .padLeft(2, '0')}:${TimeOfDay
+        .now()
+        .minute
+        .toString()
+        .padLeft(2, '0')}';
     timeController = TextEditingController(text: initialTime);
 
     startsOnValue = widget.initialReminder?.startsOn ?? DateTime.now();
-    endsOnValue = widget.initialReminder?.endsOn ?? DateTime.now().add(const Duration(days: 7));
+    endsOnValue = widget.initialReminder?.endsOn ??
+        DateTime.now().add(const Duration(days: 7));
     neverEnds = widget.initialReminder?.neverEnds ?? true;
-    noteController = TextEditingController(text: widget.initialReminder?.note ?? '');
+    noteController =
+        TextEditingController(text: widget.initialReminder?.note ?? '');
   }
 
   @override
@@ -1116,7 +615,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
   }
 
   // Show date picker
-  Future<void> _selectDate(BuildContext context, {required DateTime initialDate, required Function(DateTime) onSelect}) async {
+  Future<void> _selectDate(BuildContext context,
+      {required DateTime initialDate, required Function(DateTime) onSelect}) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -1143,7 +643,9 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
 
     if (picked != null) {
       setState(() {
-        timeController.text = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+        timeController.text =
+        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString()
+            .padLeft(2, '0')}';
       });
     }
   }
@@ -1155,7 +657,10 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
     }
 
     final reminder = Reminder(
-      id: widget.initialReminder?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.initialReminder?.id ?? DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString(),
       title: titleController.text,
       type: reminderType,
       time: timeController.text,
@@ -1187,7 +692,15 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
     setState(() {
       titleController.clear();
       dateValue = DateTime.now();
-      timeController.text = '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
+      timeController.text = '${TimeOfDay
+          .now()
+          .hour
+          .toString()
+          .padLeft(2, '0')}:${TimeOfDay
+          .now()
+          .minute
+          .toString()
+          .padLeft(2, '0')}';
       startsOnValue = DateTime.now();
       endsOnValue = DateTime.now().add(const Duration(days: 7));
       noteController.clear();
@@ -1205,7 +718,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: const Color(0xFF89D0ED), // Using midShade from your MyActivity
+        backgroundColor: const Color(
+            0xFF89D0ED), // Using midShade from your MyActivity
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -1236,7 +750,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color: reminderType == 'one-time'
-                                  ? const Color(0xFF5FB8DD) // Using primaryColor from your MyActivity
+                                  ? const Color(
+                                  0xFF5FB8DD) // Using primaryColor from your MyActivity
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -1265,7 +780,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color: reminderType == 'repeat'
-                                  ? const Color(0xFF5FB8DD) // Using primaryColor from your MyActivity
+                                  ? const Color(
+                                  0xFF5FB8DD) // Using primaryColor from your MyActivity
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -1309,7 +825,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               decoration: BoxDecoration(
                                 color: repeatType == 'daily'
-                                    ? const Color(0xFF5FB8DD) // Using primaryColor from your MyActivity
+                                    ? const Color(
+                                    0xFF5FB8DD) // Using primaryColor from your MyActivity
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -1338,7 +855,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               decoration: BoxDecoration(
                                 color: repeatType == 'custom'
-                                    ? const Color(0xFF5FB8DD) // Using primaryColor from your MyActivity
+                                    ? const Color(
+                                    0xFF5FB8DD) // Using primaryColor from your MyActivity
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -1426,7 +944,9 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                                 ),
                               ),
                               child: Text(
-                                dateValue != null ? _formatDate(dateValue!) : 'Select date',
+                                dateValue != null
+                                    ? _formatDate(dateValue!)
+                                    : 'Select date',
                               ),
                             ),
                           ),
@@ -1460,7 +980,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                         const SizedBox(height: 16),
 
                         // Custom repeat options
-                        if (reminderType == 'repeat' && repeatType == 'custom') ...[
+                        if (reminderType == 'repeat' &&
+                            repeatType == 'custom') ...[
                           const Text(
                             'Starts on*',
                             style: TextStyle(
@@ -1478,7 +999,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                                   setState(() {
                                     startsOnValue = date;
                                     // If end date is before start date, update it
-                                    if (!neverEnds && endsOnValue != null && endsOnValue!.isBefore(date)) {
+                                    if (!neverEnds && endsOnValue != null &&
+                                        endsOnValue!.isBefore(date)) {
                                       endsOnValue = date;
                                     }
                                   });
@@ -1494,7 +1016,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                                 ),
                               ),
                               child: Text(
-                                startsOnValue != null ? _formatDate(startsOnValue!) : 'Select start date',
+                                startsOnValue != null ? _formatDate(
+                                    startsOnValue!) : 'Select start date',
                               ),
                             ),
                           ),
@@ -1518,7 +1041,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                                     neverEnds = value;
                                   });
                                 },
-                                activeColor: const Color(0xFF5FB8DD), // Using primaryColor from your MyActivity
+                                activeColor: const Color(
+                                    0xFF5FB8DD), // Using primaryColor from your MyActivity
                               ),
                             ],
                           ),
@@ -1538,7 +1062,9 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                               onTap: () {
                                 _selectDate(
                                   context,
-                                  initialDate: endsOnValue ?? DateTime.now().add(const Duration(days: 7)),
+                                  initialDate: endsOnValue ??
+                                      DateTime.now().add(
+                                          const Duration(days: 7)),
                                   onSelect: (date) {
                                     setState(() {
                                       endsOnValue = date;
@@ -1555,7 +1081,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                                   ),
                                 ),
                                 child: Text(
-                                  endsOnValue != null ? _formatDate(endsOnValue!) : 'Select end date',
+                                  endsOnValue != null ? _formatDate(
+                                      endsOnValue!) : 'Select end date',
                                 ),
                               ),
                             ),
@@ -1588,7 +1115,8 @@ class _ReminderSetupScreenState extends State<ReminderSetupScreen> {
                               child: ElevatedButton(
                                 onPressed: _saveReminder,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF5FB8DD), // Using primaryColor from your MyActivity
+                                  backgroundColor: const Color(0xFF5FB8DD),
+                                  // Using primaryColor from your MyActivity
                                   foregroundColor: Colors.white,
                                 ),
                                 child: const Text('Save'),

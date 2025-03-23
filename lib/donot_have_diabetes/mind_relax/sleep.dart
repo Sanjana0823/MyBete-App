@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/mind_relax.dart';
+import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep2.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -127,7 +128,14 @@ class WelcomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 24.0, vertical: 32.0),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const SleepScheduleScreen()), // Navigate to Sleep2 screen
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8E97FD),
                       foregroundColor: Colors.white,

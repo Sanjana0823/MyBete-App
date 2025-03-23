@@ -3,18 +3,30 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mybete_app/firebase_options.dart';
+import 'package:timezone/data/latest.dart' as tz_init;
+import 'have_diabetes/DashBoard/Reminder/Reminders.dart';
 import 'sign_up_screen.dart';
 import 'log_in_screen.dart';
 import 'diabete_options.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'firebase_options.dart';
 
+
+// // Global notifications plugin
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+// FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // Enable offline persistence
   FirebaseFirestore.instance.settings = Settings(persistenceEnabled: true);
+
+  // // Initialize notifications
+  // await initNotifications();
 
   runApp(MyApp());
 }
@@ -60,5 +72,28 @@ class MyApp extends StatelessWidget {
         date1.month == date2.month &&
         date1.day == date2.day;
   }
-    }
+}
+
+//
+// // Initialize notifications
+// Future<void> initNotifications() async {
+//   tz_init.initializeTimeZones();
+//
+//   const AndroidInitializationSettings initializationSettingsAndroid =
+//   AndroidInitializationSettings('@mipmap/ic_launcher');
+//   final DarwinInitializationSettings initializationSettingsIOS =
+//   DarwinInitializationSettings(
+//     requestAlertPermission: true,
+//     requestBadgePermission: true,
+//     requestSoundPermission: true,
+//   );
+//   final InitializationSettings initializationSettings = InitializationSettings(
+//     android: initializationSettingsAndroid,
+//     iOS: initializationSettingsIOS,
+//   );
+//   await flutterLocalNotificationsPlugin.initialize(
+//     initializationSettings,
+//   );
+// }
+
 

@@ -41,7 +41,7 @@ class NavigationBarWidget extends StatelessWidget {
             break;
         }
       },
-      selectedItemColor: Colors.blue, // Highlighted color for selected tab
+      selectedItemColor: Color(0xFF288994), // Highlighted color for selected tab
       unselectedItemColor: Colors.grey, // Color for unselected tabs
       items: const [
         BottomNavigationBarItem(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz1.dart'; // Import Quiz1
+import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz1.dart';
+import 'package:mybete_app/donot_have_diabetes/mind_relax/result_screen.dart'; // Import Quiz1
 
 void main() {
   runApp(const Quiz2());
@@ -25,10 +26,12 @@ class RelaxationPreferencesScreen extends StatefulWidget {
   const RelaxationPreferencesScreen({Key? key}) : super(key: key);
 
   @override
-  State<RelaxationPreferencesScreen> createState() => _RelaxationPreferencesScreenState();
+  State<RelaxationPreferencesScreen> createState() =>
+      _RelaxationPreferencesScreenState();
 }
 
-class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScreen> {
+class _RelaxationPreferencesScreenState
+    extends State<RelaxationPreferencesScreen> {
   String? relaxationType;
   String? sessionType;
   String? breathingExercise;
@@ -53,7 +56,8 @@ class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScree
                         // Navigate back to Quiz1
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => const Quiz1()),
+                          MaterialPageRoute(
+                              builder: (context) => const Quiz1()),
                         );
                       },
                     ),
@@ -67,11 +71,13 @@ class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScree
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 12),
                       ),
                       child: const Text(
                         'Skip',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -99,7 +105,12 @@ class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScree
                       QuestionCard(
                         questionNumber: 4,
                         question: 'How many hours did you sleep last night?',
-                        options: const ['Less than 4 ', '4-6 ', '6-8', 'More than 8'],
+                        options: const [
+                          'Less than 4 ',
+                          '4-6 ',
+                          '6-8',
+                          'More than 8'
+                        ],
                         selectedValue: relaxationType,
                         onChanged: (value) {
                           setState(() {
@@ -113,7 +124,8 @@ class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScree
                       // Question 5
                       QuestionCard(
                         questionNumber: 5,
-                        question: 'Do you often wake up in the middle of the night?',
+                        question:
+                            'Do you often wake up in the middle of the night?',
                         options: const ['Yes', 'No'],
                         selectedValue: sessionType,
                         onChanged: (value) {
@@ -149,8 +161,32 @@ class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScree
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Handle next action
-                    },
+                      final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, String?>? ?? {};
+
+                            final quiz1Answers = {
+                              'mood': arguments['selectedMood'],
+                              'stressLevel': arguments['selectedStressLevel'],
+                              'gratitude': arguments['selectedGratitude'],
+                            };
+
+                            final quiz2Answers = {
+                              'sleepHours': relaxationType,
+                              'wakeUpNight': sessionType,
+                              'musicHelps': breathingExercise,
+                            };
+
+                            // Navigate to results screen with the answers
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ResultScreen(
+                                  quiz1Answers: quiz1Answers,
+                                  quiz2Answers: quiz2Answers,
+                                ),
+                              ),
+                            );
+                    }, // Handle next action
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5EB7CF),
                       foregroundColor: Colors.white,
@@ -160,8 +196,9 @@ class _RelaxationPreferencesScreenState extends State<RelaxationPreferencesScree
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text(
-                      'Next',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      'Submit',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -199,7 +236,8 @@ class QuestionCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Ensures the card takes only required space
+        mainAxisSize:
+            MainAxisSize.min, // Ensures the card takes only required space
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),

@@ -1,0 +1,2 @@
+/Users/thibakarsri/Desktop/SDGP/MyBete-App/android/app/.cxx/Debug/k4l2g6x4/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/thibakarsri/Desktop/SDGP/MyBete-App/android/app/.cxx/Debug/k4l2g6x4/armeabi-v7a/CMakeFiles/rebuild_cache.dir

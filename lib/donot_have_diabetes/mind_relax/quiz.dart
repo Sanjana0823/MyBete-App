@@ -118,7 +118,8 @@ class _MindRelaxQuestionnairePageState
             Align(
               alignment: Alignment.centerLeft, // Moves it to the left
               child: Padding(
-                padding: const EdgeInsets.only(left: 8.0, top: 8.0), // Reduced left padding
+                padding: const EdgeInsets.only(
+                    left: 8.0, top: 8.0), // Reduced left padding
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, size: 28),
                   onPressed: () {
@@ -190,17 +191,15 @@ class _MindRelaxQuestionnairePageState
                   children: [
                     const SizedBox(height: 24),
 
-                    // Zen Stones Image
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1591438252948-fa5dd3701c2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                      child: Image.asset(
+                        'lib/donot_have_diabetes/mind_relax/mind images/quiz1.png', // Use the local asset path
                         width: 250,
                         height: 150,
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(height: 80),
 
                     // Age Confirmation Text
                     const Text(
@@ -285,7 +284,8 @@ class _MindRelaxQuestionnairePageState
                         ),
                         child: const Text(
                           'Get Start',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

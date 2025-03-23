@@ -39,7 +39,7 @@ class NotSureDashboard extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          BouncingCircles(), // Bouncing circles in the background
+          // BouncingCircles(), // Bouncing circles in the background
           ListView.builder(
             itemCount: symptoms.length,
             itemBuilder: (context, index) {
@@ -156,67 +156,67 @@ class LevelDetailScreen extends StatelessWidget {
   }
 }
 
-class BouncingCircles extends StatefulWidget {
-  @override
-  _BouncingCirclesState createState() => _BouncingCirclesState();
-}
-
-class _BouncingCirclesState extends State<BouncingCircles> with SingleTickerProviderStateMixin {
-  AnimationController? _controller;
-  List<Offset> positions = [Offset(0, 0), Offset(200, 200), Offset(100, 100)];
-  List<Offset> directions = [Offset(2, 2), Offset(-2, 2), Offset(2, -2)];
-  List<double> sizes = [60, 80, 100];
-  Size? screenSize;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 5),
-      vsync: this,
-    )..addListener(() {
-      setState(() {
-        for (int i = 0; i < positions.length; i++) {
-          positions[i] += directions[i];
-
-          if (positions[i].dx <= 0 || positions[i].dx >= (screenSize!.width - sizes[i])) {
-            directions[i] = Offset(-directions[i].dx, directions[i].dy);
-          }
-          if (positions[i].dy <= 0 || positions[i].dy >= (screenSize!.height - sizes[i])) {
-            directions[i] = Offset(directions[i].dx, -directions[i].dy);
-          }
-        }
-      });
-    })..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    screenSize = MediaQuery.of(context).size;
-
-    return Stack(
-      children: positions
-          .asMap()
-          .entries
-          .map((entry) => Positioned(
-        left: entry.value.dx,
-        top: entry.value.dy,
-        child: Container(
-          width: sizes[entry.key],
-          height: sizes[entry.key],
-          decoration: BoxDecoration(
-            color: Color(0xFF06333B),
-            shape: BoxShape.circle,
-          ),
-        ),
-      ))
-          .toList(),
-    );
-  }
-}
+// class BouncingCircles extends StatefulWidget {
+//   @override
+//   _BouncingCirclesState createState() => _BouncingCirclesState();
+// }
+//
+// class _BouncingCirclesState extends State<BouncingCircles> with SingleTickerProviderStateMixin {
+//   AnimationController? _controller;
+//   List<Offset> positions = [Offset(0, 0), Offset(200, 200), Offset(100, 100)];
+//   List<Offset> directions = [Offset(2, 2), Offset(-2, 2), Offset(2, -2)];
+//   List<double> sizes = [60, 80, 100];
+//   Size? screenSize;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _controller = AnimationController(
+//       duration: const Duration(seconds: 5),
+//       vsync: this,
+//     )..addListener(() {
+//       setState(() {
+//         for (int i = 0; i < positions.length; i++) {
+//           positions[i] += directions[i];
+//
+//           if (positions[i].dx <= 0 || positions[i].dx >= (screenSize!.width - sizes[i])) {
+//             directions[i] = Offset(-directions[i].dx, directions[i].dy);
+//           }
+//           if (positions[i].dy <= 0 || positions[i].dy >= (screenSize!.height - sizes[i])) {
+//             directions[i] = Offset(directions[i].dx, -directions[i].dy);
+//           }
+//         }
+//       });
+//     })..repeat();
+//   }
+//
+//   @override
+//   void dispose() {
+//     _controller?.dispose();
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     screenSize = MediaQuery.of(context).size;
+//
+//     return Stack(
+//       children: positions
+//           .asMap()
+//           .entries
+//           .map((entry) => Positioned(
+//         left: entry.value.dx,
+//         top: entry.value.dy,
+//         child: Container(
+//           width: sizes[entry.key],
+//           height: sizes[entry.key],
+//           decoration: BoxDecoration(
+//             color: Color(0xFF06333B),
+//             shape: BoxShape.circle,
+//           ),
+//         ),
+//       ))
+//           .toList(),
+//     );
+//   }
+// }
