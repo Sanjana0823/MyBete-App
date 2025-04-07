@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/mind_relax.dart';
-import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep2.dart';
+//import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep2.dart';
+import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep_dashboard.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -133,7 +134,7 @@ class WelcomeScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                const SleepScheduleScreen()), // Navigate to Sleep2 screen
+                                 SleepApp()), // Navigate to Sleep2 screen
                       );
                     },
                     style: ElevatedButton.styleFrom(

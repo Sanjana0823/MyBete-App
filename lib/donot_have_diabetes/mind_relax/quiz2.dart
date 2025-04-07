@@ -126,7 +126,7 @@ class _RelaxationPreferencesScreenState
                         },
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
                       // Question 5
                       QuestionCard(
@@ -142,7 +142,7 @@ class _RelaxationPreferencesScreenState
                         },
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
                       // Question 6
                       QuestionCard(
