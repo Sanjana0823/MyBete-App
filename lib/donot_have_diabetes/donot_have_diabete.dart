@@ -31,11 +31,11 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "I don't have diabetes",
+                                " Do Not Have Diabetes",
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.grey[800],
+                                  
                                 ),
                               ),
                               const SizedBox(height: 4),

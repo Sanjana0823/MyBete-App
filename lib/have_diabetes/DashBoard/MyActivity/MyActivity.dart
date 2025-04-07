@@ -6,11 +6,14 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
+
+
+
+
 import '../Reminder/Reminder_screen.dart';
 import '../Report/report_screen.dart';
 import 'LogDetails/LogInterface.dart';
 import 'log_provider.dart';
-
 import 'weekly_stats_screen.dart';
 
 
@@ -1096,260 +1099,258 @@ class _MyActivityScreenState extends State<MyActivityScreen> {
   // Build My Activity content
   Widget _buildMyActivityContent() {
     return Consumer<LogProvider>(
-      builder: (context, logProvider, child) {
-        final isLoading = logProvider.isLoading;
-        final logs = logProvider.logs;
-        final groupedByDate = logProvider.groupedByDate;
-        final todayAverage = logProvider.todayAverage;
+        builder: (context, logProvider, child) {
+          final isLoading = logProvider.isLoading;
+          final logs = logProvider.logs;
+          final groupedByDate = logProvider.groupedByDate;
+          final todayAverage = logProvider.todayAverage;
 
-        return SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              // App bar with search functionality
-              Container(
-                padding: const EdgeInsets.only(top: 0),
-                color: _primaryColor,
-                child: _isSearching
-                    ? Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 40, bottom: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: 'Search logs...',
-                            hintStyle: TextStyle(
-                              fontFamily: GoogleFonts.poppins().fontFamily,
-                              color: Colors.black54,
+          return SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                // App bar with search functionality
+                Container(
+                  padding: const EdgeInsets.only(top: 0),
+                  color: _primaryColor,
+                  child: _isSearching
+                      ? Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20, top: 40, bottom: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: 'Search logs...',
+                              hintStyle: TextStyle(
+                                fontFamily: GoogleFonts.poppins().fontFamily,
+                                color: Colors.black54,
+                              ),
+                              border: InputBorder.none,
+                              prefixIcon: Icon(Icons.search, color: Colors.black87),
                             ),
-                            border: InputBorder.none,
-                            prefixIcon: Icon(Icons.search, color: Colors.black87),
+                            style: TextStyle(
+                              fontFamily: GoogleFonts.poppins().fontFamily,
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                              _filterLogEntries();
+                            },
                           ),
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.poppins().fontFamily,
-                            fontSize: 16,
-                            color: Colors.black87,
-                          ),
-                          onChanged: (value) {
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.black87),
+                          onPressed: () {
                             setState(() {
-                              _searchQuery = value;
+                              _isSearching = false;
+                              _searchQuery = '';
+                              _searchController.clear();
                             });
-                            _filterLogEntries();
                           },
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.black87),
-                        onPressed: () {
-                          setState(() {
-                            _isSearching = false;
-                            _searchQuery = '';
-                            _searchController.clear();
-                          });
-                        },
-                      ),
-                    ],
+                      ],
+                    ),
+                  )
+                      : Padding(
+                    padding: EdgeInsets.only(left: 20, right: 20, top: 50, bottom: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'My Activity',
+                          style: TextStyle(
+                            fontFamily: GoogleFonts.poppins().fontFamily,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.search, color: Colors.black87),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          onPressed: () {
+                            setState(() {
+                              _isSearching = true;
+                              _filteredLogEntries = Provider.of<LogProvider>(context, listen: false).logs;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                )
-                    : Padding(
-                  padding: EdgeInsets.only(left: 20, right: 20, top: 50, bottom: 16),
+                ),
+
+                // Stats section
+                _buildStatsGraph(),
+
+                // Today's average and See More button
+                Padding(
+                  padding: const EdgeInsets.only(left: 120, right: 15, top: 0, bottom: 5),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Spacer(),
                       Text(
-                        'My Activity',
+                        'Today',
                         style: TextStyle(
                           fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black87,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: _textColor,
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.search, color: Colors.black87),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                        onPressed: () {
-                          setState(() {
-                            _isSearching = true;
-                            _filteredLogEntries = Provider.of<LogProvider>(context, listen: false).logs;
-                          });
-                        },
+                      Spacer(),
+                      TextButton(
+                        onPressed: _navigateToWeeklyStats,
+                        child: Text(
+                          'See more >',
+                          style: TextStyle(
+                            fontFamily: GoogleFonts.poppins().fontFamily,
+                            fontSize: 14,
+                            color: _accentColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
 
-              // Stats section
-              _buildStatsGraph(),
-
-              // Today's average and See More button
-              Padding(
-                padding: const EdgeInsets.only(left: 120, right: 15, top: 0, bottom: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Spacer(),
-                    Text(
-                      'Today',
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: _textColor,
-                      ),
-                    ),
-                    Spacer(),
-                    TextButton(
-                      onPressed: _navigateToWeeklyStats,
-                      child: Text(
-                        'See more >',
+                // Average circle
+                Center(
+                  child: Column(
+                    children: [
+                      _buildAverageCircle(todayAverage),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Average',
                         style: TextStyle(
                           fontFamily: GoogleFonts.poppins().fontFamily,
                           fontSize: 14,
-                          color: _accentColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Average circle
-              Center(
-                child: Column(
-                  children: [
-                    _buildAverageCircle(todayAverage),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Average',
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                        fontSize: 14,
-                        color: _textColor.withAlpha(178),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Divider
-              Divider(height: 1, color: Colors.grey[200]),
-
-              // Log entries (scrollable)
-              Expanded(
-                child: isLoading || _isDeleting
-                    ? Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(_accentColor),
-                  ),
-                )
-                    : _isSearching
-                    ? _buildSearchResults()
-                    : groupedByDate.isEmpty
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.note_alt_outlined,
-                        size: 48,
-                        color: _accentColor.withAlpha(128),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No log entries yet',
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontSize: 16,
                           color: _textColor.withAlpha(178),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tap the + button to add your first log',
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontSize: 14,
-                          color: _textColor.withAlpha(128),
-                        ),
-                      ),
                     ],
                   ),
-                )
-                    : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: groupedByDate.length,
-                  itemBuilder: (context, index) {
-                    final date = groupedByDate.keys.elementAt(index);
-                    final logs = groupedByDate[date]!;
-                    final formattedDate = _formatDate(date);
-                    final isExpanded = _expandedSections.contains(formattedDate);
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        color: _lightColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Date header with expand/collapse
-                          InkWell(
-                            onTap: () => _toggleSection(formattedDate),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    formattedDate,
-                                    style: TextStyle(
-                                      fontFamily: GoogleFonts.poppins().fontFamily,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: _textColor,
-                                    ),
-                                  ),
-                                  Icon(
-                                    isExpanded
-                                        ? Icons.keyboard_arrow_up
-                                        : Icons.keyboard_arrow_down,
-                                    color: _accentColor,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Log entries for this date
-                          if (isExpanded)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              child: Column(
-                                children: logs.map((log) => _buildLogEntryItem(log)).toList(),
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
                 ),
-              ),
-            ],
-          ),
+
+                const SizedBox(height: 16),
+
+                // Divider
+                Divider(height: 1, color: Colors.grey[200]),
+
+                // Log entries (scrollable)
+                Expanded(
+                  child: isLoading || _isDeleting
+                      ? Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(_accentColor),
+                    ),
+                  )
+                      : _isSearching
+                      ? _buildSearchResults()
+                      : groupedByDate.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.note_alt_outlined,
+                          size: 48,
+                          color: _accentColor.withAlpha(128),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No log entries yet',
+                          style: TextStyle(
+                            fontFamily: GoogleFonts.poppins().fontFamily,
+                            fontSize: 16,
+                            color: _textColor.withAlpha(178),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap the + button to add your first log',
+                          style: TextStyle(
+                            fontFamily: GoogleFonts.poppins().fontFamily,
+                            fontSize: 14,
+                            color: _textColor.withAlpha(128),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: groupedByDate.length,
+                    itemBuilder: (context, index) {
+                      final date = groupedByDate.keys.elementAt(index);
+                      final logs = groupedByDate[date]!;
+                      final formattedDate = _formatDate(date);
+                      final isExpanded = _expandedSections.contains(formattedDate);
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: _lightColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Date header with expand/collapse
+                            InkWell(
+                              onTap: () => _toggleSection(formattedDate),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      formattedDate,
+                                      style: TextStyle(
+                                        fontFamily: GoogleFonts.poppins().fontFamily,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: _textColor,
+                                      ),
+                                    ),
+                                    Icon(
+                                      isExpanded
+                                          ? Icons.keyboard_arrow_up
+                                          : Icons.keyboard_arrow_down,
+                                      color: _accentColor,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Log entries for this date
+                            if (isExpanded)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                child: Column(
+                                  children: logs.map((log) => _buildLogEntryItem(log)).toList(),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+          },
         );
-      },
-    );
-  }
+    }
 }
-
-

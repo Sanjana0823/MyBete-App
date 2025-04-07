@@ -71,7 +71,5 @@ class FirestoreService {
     }
 
     await _logsCollection.doc(id).delete();
-  }
+    }
 }
-
-

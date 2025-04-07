@@ -328,5 +328,5 @@ class ReportService {
     } catch (e) {
       debugPrint("Error sharing file: $e");
     }
-  }
+    }
 }

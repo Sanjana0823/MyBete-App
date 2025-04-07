@@ -4,7 +4,7 @@ import 'package:mybete_app/donot_have_diabetes/mind_relax/quiz.dart';
 import 'package:mybete_app/donot_have_diabetes/Fitness/exercise.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/music.dart';
-import 'package:mybete_app/donot_have_diabetes/donot_have_diabete.dart';// Import for back navigation
+import 'package:mybete_app/donot_have_diabetes/donot_have_diabete.dart'; // Import for back navigation
 
 void main() {
   runApp(const MindRelaxDashboard());

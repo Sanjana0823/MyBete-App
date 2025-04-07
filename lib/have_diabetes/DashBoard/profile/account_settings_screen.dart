@@ -46,7 +46,7 @@
 //
 //           Expanded(
 //             child: Container(
-//               color: Color(0xFFF0F9FD),
+//               color: Color(0xFFFFFFFF),
 //               child: SingleChildScrollView(
 //                 child: Column(
 //                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +119,7 @@
 //                           ),
 //                           SizedBox(height: 5),
 //                           Text(
-//                             "srithiba534@gmail.com",
+//                             "thenujaasuntharesan@gmail.com",
 //                             style: TextStyle(
 //                               fontSize: 14,
 //                               color: Colors.grey[600],
@@ -128,21 +128,21 @@
 //                           SizedBox(height: 20),
 //
 //                           // First name
-//                           _buildInfoField(
+//                           _buildInfoField (
 //                             title: "First name",
 //                             value: firstName,
 //                             onTap: () => _showNameInputDialog("First name"),
 //                           ),
 //
 //                           // Last name
-//                           _buildInfoField(
+//                           _buildInfoField (
 //                             title: "Last name",
 //                             value: lastName,
 //                             onTap: () => _showNameInputDialog("Last name"),
 //                           ),
 //
 //                           // Date of Birth
-//                           _buildInfoField(
+//                           _buildInfoField (
 //                             title: "Date of Birth",
 //                             value: dateOfBirth,
 //                             onTap: () => _selectDate(context),
@@ -199,10 +199,10 @@
 //                             onTap: () {
 //                               // Handle account deletion
 //                             },
-//                             child: Row(
+//                             child: Row (
 //                               children: [
-//                                 Icon(Icons.delete_outline, color: Colors.red),
-//                                 SizedBox(width: 15),
+//                                 Icon( Icons.delete_outline, color: Colors.red ),
+//                                 SizedBox( width: 15 ),
 //                                 Text(
 //                                   "Delete my account",
 //                                   style: TextStyle(
@@ -280,7 +280,7 @@
 //   String? _imagePath;
 //
 //
-//   void _showNameInputDialog(String field) {
+//   void _showNameInputDialog (String field) {
 //     TextEditingController controller = TextEditingController();
 //
 //     showDialog(
@@ -373,6 +373,8 @@
 //     }
 //   }
 // }
+
+
 
 
 import 'package:flutter/material.dart';
