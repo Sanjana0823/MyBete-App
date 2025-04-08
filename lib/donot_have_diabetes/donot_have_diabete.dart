@@ -6,12 +6,15 @@ import 'meal_plans/meal.dart';
 class DonotHaveDiabeteDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyLarge?.color;
+    final secondaryTextColor = theme.textTheme.bodyMedium?.color;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // App Bar
             SliverAppBar(
               expandedHeight: 120,
               backgroundColor: Colors.transparent,
@@ -32,10 +35,8 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                             children: [
                               Text(
                                 " Do Not Have Diabetes",
-                                style: TextStyle(
-                                  fontSize: 24,
+                                style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -43,7 +44,7 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                                 "Your path to better health",
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey[600],
+                                  color: secondaryTextColor,
                                 ),
                               ),
                             ],
@@ -51,7 +52,7 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                           CircleAvatar(
                             radius: 24,
                             backgroundColor: const Color(0xFF5E60CE),
-                            child: Text(
+                            child: const Text(
                               "SJ",
                               style: TextStyle(
                                 color: Colors.white,
@@ -66,16 +67,11 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                 ),
               ),
             ),
-            
-            // Main Content
             SliverPadding(
               padding: const EdgeInsets.all(20),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Main menu cards
                   const SizedBox(height: 20),
-                  
-                  // Meal Planner Card
                   DashboardCard(
                     title: "Meal Planner",
                     description: "Discover healthy recipes and meal plans tailored to your needs",
@@ -84,10 +80,7 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                     page: MealPlannerScreen(),
                     imagePath: "assets/images/meal.jpg",
                   ),
-                  
                   const SizedBox(height: 20),
-                  
-                  // Mind Relax Card
                   DashboardCard(
                     title: "Mind Relax",
                     description: "Meditation and mindfulness exercises to reduce stress",
@@ -96,10 +89,7 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                     page: MindRelaxDashboard(),
                     imagePath: "assets/images/meditation.jpg",
                   ),
-                  
                   const SizedBox(height: 20),
-                  
-                  // Fitness Card
                   DashboardCard(
                     title: "Fitness",
                     description: "Personalized workout plans to keep you active and healthy",
@@ -108,29 +98,24 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                     page: Exercise(),
                     imagePath: "assets/images/fitness.jpg",
                   ),
-                  
                   const SizedBox(height: 30),
-                  
-                  // Quick Tips Section
                   Text(
                     "Today's Wellness Tip",
-                    style: TextStyle(
-                      fontSize: 18,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
                     ),
                   ),
-                  
                   const SizedBox(height: 16),
-                  
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.05),
+                          color: theme.brightness == Brightness.light
+                              ? Colors.grey.withOpacity(0.05)
+                              : Colors.transparent,
                           spreadRadius: 1,
                           blurRadius: 5,
                           offset: const Offset(0, 2),
@@ -168,7 +153,7 @@ class DonotHaveDiabeteDashboard extends StatelessWidget {
                               Text(
                                 "Drinking enough water each day is crucial for many reasons: to regulate body temperature, keep joints lubricated, prevent infections, deliver nutrients to cells, and keep organs functioning properly.",
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: secondaryTextColor,
                                   fontSize: 14,
                                 ),
                               ),
@@ -208,7 +193,9 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Since we might not have actual images, we'll use a placeholder
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyLarge?.color;
+
     Widget imageWidget = Container(
       height: 140,
       decoration: BoxDecoration(
@@ -233,11 +220,13 @@ class DashboardCard extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: theme.brightness == Brightness.light
+                  ? Colors.grey.withOpacity(0.08)
+                  : Colors.transparent,
               spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, 3),
@@ -247,10 +236,7 @@ class DashboardCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image or colored section at top
             imageWidget,
-            
-            // Content section
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -273,9 +259,8 @@ class DashboardCard extends StatelessWidget {
                       const SizedBox(width: 12),
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
                         ),
                       ),
                     ],
@@ -284,7 +269,7 @@ class DashboardCard extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: textColor?.withOpacity(0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -326,15 +311,34 @@ class DashboardCard extends StatelessWidget {
   }
 }
 
+// Main function with theme switching
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      primaryColor: const Color(0xFF5E60CE),
-      fontFamily: 'Roboto',
-      scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: const Color(0xFF5E60CE),
+        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+        cardColor: Colors.white,
+        fontFamily: 'Roboto',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF121212),
+        cardColor: const Color(0xFF1E1E1E),
+        fontFamily: 'Roboto',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      ),
+      themeMode: ThemeMode.system,
+      home: DonotHaveDiabeteDashboard(),
     ),
-    home: DonotHaveDiabeteDashboard(),
-  ));
+  );
 }
-

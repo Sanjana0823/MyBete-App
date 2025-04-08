@@ -26,24 +26,24 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
   late TabController _tabController;
 
   // Meal data
-  double breakfastCalories = 0;
-  double lunchCalories = 0;
-  double dinnerCalories = 0;
-  double snackCalories = 0;
-  double totalCalories = 0;
+  int breakfastCalories = 0;
+  int lunchCalories = 0;
+  int dinnerCalories = 0;
+  int snackCalories = 0;
+  int totalCalories = 0;
 
   // Calorie goals
-  double breakfastGoal = 500;
-  double lunchGoal = 700;
-  double dinnerGoal = 600;
-  double snackGoal = 200;
-  double calorieGoal = 2000;
+  int breakfastGoal = 500;
+  int lunchGoal = 700;
+  int dinnerGoal = 600;
+  int snackGoal = 200;
+  int calorieGoal = 2000;
 
   // Recent meals
   List<Map<String, dynamic>> recentMeals = [];
 
   // Food category data
-  Map<String, double> categoryData = {
+  Map<String, int> categoryData = {
     'vegetables': 0,
     'fruits': 0,
     'grains': 0,
@@ -138,13 +138,17 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
         if (data != null) {
           if (!mounted) return;
           setState(() {
-            breakfastCalories = (data['breakfastCalories'] as num?)?.toDouble() ?? 0;
-            lunchCalories = (data['lunchCalories'] as num?)?.toDouble() ?? 0;
-            dinnerCalories = (data['dinnerCalories'] as num?)?.toDouble() ?? 0;
-            snackCalories = (data['snackCalories'] as num?)?.toDouble() ?? 0;
-            totalCalories = breakfastCalories + lunchCalories + dinnerCalories + snackCalories;
+            breakfastCalories = (data['breakfastCalories'] as num?)?.toInt() ?? 0;
+            lunchCalories = (data['lunchCalories'] as num?)?.toInt() ?? 0;
+            dinnerCalories = (data['dinnerCalories'] as num?)?.toInt() ?? 0;
+            snackCalories = (data['snackCalories'] as num?)?.toInt() ?? 0;
+            totalCalories = (data['totalCalories'] as num?)?.toInt() ??
+                (breakfastCalories + lunchCalories + dinnerCalories + snackCalories);
           });
         }
+      } else {
+        // If no daily_meals document exists, calculate from individual collections
+        await _calculateMealDataFromCollections();
       }
 
       // Load user preferences
@@ -155,11 +159,11 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
           final prefs = data['preferences'] as Map<String, dynamic>;
           if (!mounted) return;
           setState(() {
-            calorieGoal = (prefs['calorieGoal'] as num?)?.toDouble() ?? 2000;
-            breakfastGoal = (prefs['breakfastGoal'] as num?)?.toDouble() ?? 500;
-            lunchGoal = (prefs['lunchGoal'] as num?)?.toDouble() ?? 700;
-            dinnerGoal = (prefs['dinnerGoal'] as num?)?.toDouble() ?? 600;
-            snackGoal = (prefs['snackGoal'] as num?)?.toDouble() ?? 200;
+            calorieGoal = (prefs['calorieGoal'] as num?)?.toInt() ?? 2000;
+            breakfastGoal = (prefs['breakfastGoal'] as num?)?.toInt() ?? 500;
+            lunchGoal = (prefs['lunchGoal'] as num?)?.toInt() ?? 700;
+            dinnerGoal = (prefs['dinnerGoal'] as num?)?.toInt() ?? 600;
+            snackGoal = (prefs['snackGoal'] as num?)?.toInt() ?? 200;
           });
         }
       }
@@ -169,29 +173,198 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
     }
   }
 
+  Future<void> _calculateMealDataFromCollections() async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
+    int breakfast = 0;
+    int lunch = 0;
+    int dinner = 0;
+    int snack = 0;
+
+    // Categories to query
+    List<String> categories = [
+      'vegetable_calories',
+      'fruit_calories',
+      'grain_calories',
+      'dairy_calories',
+      'protein_calories',
+      'bakery_calories',
+      'beverage_calories',
+      'breakfast_calories',
+      'lunch_calories',
+      'dinner_calories',
+      'snack_calories',
+      'breakfast_recipe_calories',
+      'lunch_recipe_calories',
+      'dinner_recipe_calories',
+      'snack_recipe_calories'
+    ];
+
+    for (String category in categories) {
+      final querySnapshot = await userRef.collection(category)
+          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        if (data['calories'] is num) {
+          final calories = (data['calories'] as num).toInt();
+
+          // Determine meal type
+          String mealType;
+          if (data['mealType'] != null) {
+            mealType = (data['mealType'] as String).toLowerCase();
+          } else if (category.startsWith('breakfast')) {
+            mealType = 'breakfast';
+          } else if (category.startsWith('lunch')) {
+            mealType = 'lunch';
+          } else if (category.startsWith('dinner')) {
+            mealType = 'dinner';
+          } else if (category.startsWith('snack')) {
+            mealType = 'snack';
+          } else {
+            // Determine by time
+            final timestamp = data['timestamp'] as Timestamp;
+            final time = timestamp.toDate();
+            mealType = _determineMealTypeByTime(time).toLowerCase();
+          }
+
+          // Add to appropriate meal total
+          switch (mealType) {
+            case 'breakfast':
+              breakfast += calories;
+              break;
+            case 'lunch':
+              lunch += calories;
+              break;
+            case 'dinner':
+              dinner += calories;
+              break;
+            case 'snack':
+              snack += calories;
+              break;
+          }
+        }
+      }
+    }
+
+    // Update state
+    if (!mounted) return;
+    setState(() {
+      breakfastCalories = breakfast;
+      lunchCalories = lunch;
+      dinnerCalories = dinner;
+      snackCalories = snack;
+      totalCalories = breakfast + lunch + dinner + snack;
+    });
+
+    // Save to daily_meals for future reference
+    final dateStr = DateFormat('yyyy-MM-dd').format(now);
+    await userRef.collection('daily_meals').doc(dateStr).set({
+      'breakfastCalories': breakfast,
+      'lunchCalories': lunch,
+      'dinnerCalories': dinner,
+      'snackCalories': snack,
+      'totalCalories': breakfast + lunch + dinner + snack,
+      'lastUpdated': Timestamp.now(),
+    });
+  }
+
+  String _determineMealTypeByTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+
+    if (hour >= 5 && hour < 11) {
+      return 'Breakfast';
+    } else if (hour >= 11 && hour < 15) {
+      return 'Lunch';
+    } else if (hour >= 17 && hour < 22) {
+      return 'Dinner';
+    } else {
+      return 'Snack';
+    }
+  }
+
   Future<void> _loadRecentMeals() async {
     try {
       // Get today's date
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
-
-      // Query food collection for recent meals
-      final querySnapshot = await userRef.collection('food')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-          .orderBy('timestamp', descending: true)
-          .limit(5)
-          .get();
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
       List<Map<String, dynamic>> meals = [];
-      for (var doc in querySnapshot.docs) {
-        final data = doc.data();
-        meals.add({
-          'id': doc.id,
-          'name': data['name'] ?? 'Food Item',
-          'calories': data['calories'] ?? 0,
-          'timestamp': data['timestamp'] ?? Timestamp.now(),
-          'mealType': data['mealType'] ?? 'Snack',
-        });
+
+      // Categories to query
+      List<String> categories = [
+        'vegetable_calories',
+        'fruit_calories',
+        'grain_calories',
+        'dairy_calories',
+        'protein_calories',
+        'bakery_calories',
+        'beverage_calories',
+        'breakfast_calories',
+        'lunch_calories',
+        'dinner_calories',
+        'snack_calories',
+        'breakfast_recipe_calories',
+        'lunch_recipe_calories',
+        'dinner_recipe_calories',
+        'snack_recipe_calories'
+      ];
+
+      for (String category in categories) {
+        final querySnapshot = await userRef.collection(category)
+            .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+            .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+            .orderBy('timestamp', descending: true)
+            .limit(5)
+            .get();
+
+        for (var doc in querySnapshot.docs) {
+          final data = doc.data();
+
+          // Determine meal type
+          String mealType;
+          if (data['mealType'] != null) {
+            mealType = data['mealType'] as String;
+          } else if (category.startsWith('breakfast')) {
+            mealType = 'Breakfast';
+          } else if (category.startsWith('lunch')) {
+            mealType = 'Lunch';
+          } else if (category.startsWith('dinner')) {
+            mealType = 'Dinner';
+          } else if (category.startsWith('snack')) {
+            mealType = 'Snack';
+          } else {
+            // Determine by time
+            final timestamp = data['timestamp'] as Timestamp;
+            final time = timestamp.toDate();
+            mealType = _determineMealTypeByTime(time);
+          }
+
+          meals.add({
+            'id': doc.id,
+            'name': data['name'] ?? 'Food Item',
+            'calories': data['calories'] ?? 0,
+            'timestamp': data['timestamp'] ?? Timestamp.now(),
+            'mealType': mealType,
+            'category': category,
+          });
+        }
+      }
+
+      // Sort by timestamp (newest first) and limit to 5
+      meals.sort((a, b) {
+        final aTimestamp = a['timestamp'] as Timestamp;
+        final bTimestamp = b['timestamp'] as Timestamp;
+        return bTimestamp.compareTo(aTimestamp);
+      });
+
+      if (meals.length > 5) {
+        meals = meals.sublist(0, 5);
       }
 
       if (!mounted) return;
@@ -209,7 +382,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
       // Get today's date
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
       // Categories to query
       final categories = [
@@ -222,7 +395,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
         'beverage_calories',
       ];
 
-      Map<String, double> data = {
+      Map<String, int> data = {
         'vegetables': 0,
         'fruits': 0,
         'grains': 0,
@@ -241,11 +414,11 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
             .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
             .get();
 
-        double total = 0;
+        int total = 0;
         for (var doc in querySnapshot.docs) {
           final calories = doc.data()['calories'] ?? 0;
           if (calories is num) {
-            total += calories.toDouble();
+            total += calories.toInt();
           }
         }
 
@@ -279,27 +452,30 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
         final dailyMealsRef = userRef.collection('daily_meals').doc(dateStr);
         final docSnapshot = await dailyMealsRef.get();
 
-        double dayTotal = 0;
+        int dayTotal = 0;
         if (docSnapshot.exists) {
           final data = docSnapshot.data() as Map<String, dynamic>?;
           if (data != null) {
-            dayTotal = (data['totalCalories'] as num?)?.toDouble() ?? 0;
+            dayTotal = (data['totalCalories'] as num?)?.toInt() ?? 0;
             if (dayTotal == 0) {
               // If totalCalories is not set, calculate from individual meal types
-              final breakfast = (data['breakfastCalories'] as num?)?.toDouble() ?? 0;
-              final lunch = (data['lunchCalories'] as num?)?.toDouble() ?? 0;
-              final dinner = (data['dinnerCalories'] as num?)?.toDouble() ?? 0;
-              final snack = (data['snackCalories'] as num?)?.toDouble() ?? 0;
+              final breakfast = (data['breakfastCalories'] as num?)?.toInt() ?? 0;
+              final lunch = (data['lunchCalories'] as num?)?.toInt() ?? 0;
+              final dinner = (data['dinnerCalories'] as num?)?.toInt() ?? 0;
+              final snack = (data['snackCalories'] as num?)?.toInt() ?? 0;
               dayTotal = breakfast + lunch + dinner + snack;
             }
           }
+        } else {
+          // If no daily_meals document, try to calculate from individual collections
+          dayTotal = await _calculateDayTotalFromCollections(date);
         }
 
         if (dayTotal > highest) {
-          highest = dayTotal;
+          highest = dayTotal.toDouble();
         }
 
-        spots.add(FlSpot(i.toDouble(), dayTotal));
+        spots.add(FlSpot(i.toDouble(), dayTotal.toDouble()));
       }
 
       if (!mounted) return;
@@ -313,7 +489,56 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
     }
   }
 
-  Future<void> _updateCalorieGoal(double newGoal) async {
+  Future<int> _calculateDayTotalFromCollections(DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+
+    int total = 0;
+
+    // Categories to query
+    List<String> categories = [
+      'vegetable_calories',
+      'fruit_calories',
+      'grain_calories',
+      'dairy_calories',
+      'protein_calories',
+      'bakery_calories',
+      'beverage_calories',
+      'breakfast_calories',
+      'lunch_calories',
+      'dinner_calories',
+      'snack_calories',
+      'breakfast_recipe_calories',
+      'lunch_recipe_calories',
+      'dinner_recipe_calories',
+      'snack_recipe_calories'
+    ];
+
+    for (String category in categories) {
+      final querySnapshot = await userRef.collection(category)
+          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        if (data['calories'] is num) {
+          total += (data['calories'] as num).toInt();
+        }
+      }
+    }
+
+    // Save to daily_meals for future reference
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    await userRef.collection('daily_meals').doc(dateStr).set({
+      'totalCalories': total,
+      'lastUpdated': Timestamp.now(),
+    }, SetOptions(merge: true));
+
+    return total;
+  }
+
+  Future<void> _updateCalorieGoal(int newGoal) async {
     try {
       // Update the calorie goal in Firestore
       await userRef.update({
@@ -327,7 +552,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Calorie goal updated to ${newGoal.toInt()} kcal'),
+          content: Text('Calorie goal updated to $newGoal kcal'),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 2),
         ),
@@ -345,7 +570,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
   }
 
   void _showCalorieGoalDialog() {
-    final TextEditingController controller = TextEditingController(text: calorieGoal.toInt().toString());
+    final TextEditingController controller = TextEditingController(text: calorieGoal.toString());
 
     showDialog(
       context: context,
@@ -392,7 +617,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                 final String value = controller.text.trim();
                 if (value.isNotEmpty) {
                   try {
-                    final double newGoal = double.parse(value);
+                    final int newGoal = int.parse(value);
                     if (newGoal > 0) {
                       _updateCalorieGoal(newGoal);
                       Navigator.of(context).pop();
@@ -446,14 +671,14 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
   }
 
   Color _getMealTypeColor(String mealType) {
-    switch (mealType) {
-      case 'Breakfast':
+    switch (mealType.toLowerCase()) {
+      case 'breakfast':
         return Colors.amber;
-      case 'Lunch':
+      case 'lunch':
         return Colors.green;
-      case 'Dinner':
+      case 'dinner':
         return Colors.purple;
-      case 'Snack':
+      case 'snack':
       default:
         return Colors.orange;
     }
@@ -475,16 +700,6 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
               child: Row(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, size: 24),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
                   ),
                   const SizedBox(width: 12),
                   const Text(
@@ -570,26 +785,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
 
             // Bottom Navigation
             Container(
-              height: 70,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavItem(Icons.dashboard, 'Dashboard', true),
-                  _buildNavItem(Icons.restaurant_menu, 'Meals', false),
-                  _buildNavItem(Icons.pie_chart, 'Summary', false),
-                  _buildNavItem(Icons.person, 'Profile', false),
-                ],
-              ),
+
             ),
           ],
         ),
@@ -656,7 +852,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const SummaryScreen()),
-          );
+          ).then((_) => _loadData());
         }
       },
       child: Container(
@@ -753,7 +949,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
               ),
               const SizedBox(width: 10),
               Text(
-                '${totalCalories.toInt()}',
+                '$totalCalories',
                 style: const TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
@@ -799,7 +995,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isOverLimit ? 'Over limit!' : 'Remaining: ${(calorieGoal - totalCalories).toInt()} kcal',
+                isOverLimit ? 'Over limit!' : 'Remaining: ${(calorieGoal - totalCalories)} kcal',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -811,7 +1007,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                 child: Row(
                   children: [
                     Text(
-                      'Goal: ${calorieGoal.toInt()} kcal',
+                      'Goal: $calorieGoal kcal',
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white70,
@@ -873,7 +1069,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                   'Track your $currentMealType to stay on top of your nutrition goals.',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.black87,
+
                   ),
                 ),
               ],
@@ -937,6 +1133,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -947,10 +1144,10 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildProgressCircle('Breakfast', breakfastCalories, breakfastGoal, Colors.amber),
-              _buildProgressCircle('Lunch', lunchCalories, lunchGoal, Colors.green),
-              _buildProgressCircle('Dinner', dinnerCalories, dinnerGoal, Colors.purple),
-              _buildProgressCircle('Snacks', snackCalories, snackGoal, Colors.orange),
+              _buildProgressCircle('Breakfast', breakfastCalories.toDouble(), breakfastGoal.toDouble(), Colors.amber),
+              _buildProgressCircle('Lunch', lunchCalories.toDouble(), lunchGoal.toDouble(), Colors.green),
+              _buildProgressCircle('Dinner', dinnerCalories.toDouble(), dinnerGoal.toDouble(), Colors.purple),
+              _buildProgressCircle('Snacks', snackCalories.toDouble(), snackGoal.toDouble(), Colors.orange),
             ],
           ),
         ],
@@ -1062,6 +1259,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
             ],
@@ -1172,8 +1370,8 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                   // Goal line
                   LineChartBarData(
                     spots: [
-                      FlSpot(0, calorieGoal),
-                      FlSpot(6, calorieGoal),
+                      FlSpot(0, calorieGoal.toDouble()),
+                      FlSpot(6, calorieGoal.toDouble()),
                     ],
                     isCurved: false,
                     color: Colors.red.withOpacity(0.5),
@@ -1204,7 +1402,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    'Daily Goal: ${calorieGoal.toInt()} kcal',
+                    'Daily Goal: $calorieGoal kcal',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.red.shade700,
@@ -1252,6 +1450,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -1304,9 +1503,9 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        mealType == 'Breakfast' ? Icons.wb_sunny :
-                        mealType == 'Lunch' ? Icons.restaurant :
-                        mealType == 'Dinner' ? Icons.nightlight :
+                        mealType.toLowerCase() == 'breakfast' ? Icons.wb_sunny :
+                        mealType.toLowerCase() == 'lunch' ? Icons.restaurant :
+                        mealType.toLowerCase() == 'dinner' ? Icons.nightlight :
                         Icons.cookie,
                         color: _getMealTypeColor(mealType),
                         size: 20,
@@ -1322,6 +1521,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
+                              color: Colors.black,
                             ),
                           ),
                           Text(
@@ -1360,7 +1560,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
 
     // Calculate total for percentage
     final totalCategoryCalories = nonZeroCategories
-        .fold(0.0, (sum, entry) => sum + entry.value);
+        .fold(0, (sum, entry) => sum + entry.value);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1391,6 +1591,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
             ],
@@ -1511,7 +1712,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${calories.toInt()} kcal',
+                          '$calories kcal',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1567,6 +1768,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
             ],
@@ -1602,7 +1804,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> with SingleTicker
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const SummaryScreen()),
-                  );
+                  ).then((_) => _loadData());
                 },
               ),
             ],

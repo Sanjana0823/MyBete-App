@@ -21,17 +21,17 @@ class _TotalScreenState extends State<TotalScreen> {
   late DocumentReference userRef;
 
   List<Map<String, dynamic>> clickedItems = [];
-  num totalCalories = 0;
+  int totalCalories = 0;
   bool isLoading = true;
   DateTime selectedDate = DateTime.now();
   bool showCalendar = false;
-  Map<DateTime, num> dailyTotals = {};
+  Map<DateTime, int> dailyTotals = {};
 
   // Meal-specific calories
-  num breakfastCalories = 0;
-  num lunchCalories = 0;
-  num dinnerCalories = 0;
-  num snackCalories = 0;
+  int breakfastCalories = 0;
+  int lunchCalories = 0;
+  int dinnerCalories = 0;
+  int snackCalories = 0;
 
   // Time ranges for meal types
   final TimeOfDay breakfastStart = TimeOfDay(hour: 5, minute: 0);
@@ -67,7 +67,26 @@ class _TotalScreenState extends State<TotalScreen> {
     });
 
     try {
-      num caloriesSum = 0;
+      // First check if we have daily totals in the daily_meals collection
+      final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
+      final dailyMealsRef = userRef.collection('daily_meals').doc(dateStr);
+      final dailyMealDoc = await dailyMealsRef.get();
+
+      if (dailyMealDoc.exists) {
+        final data = dailyMealDoc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          // Use the pre-calculated totals if available
+          setState(() {
+            breakfastCalories = (data['breakfastCalories'] as num?)?.toInt() ?? 0;
+            lunchCalories = (data['lunchCalories'] as num?)?.toInt() ?? 0;
+            dinnerCalories = (data['dinnerCalories'] as num?)?.toInt() ?? 0;
+            snackCalories = (data['snackCalories'] as num?)?.toInt() ?? 0;
+            totalCalories = (data['totalCalories'] as num?)?.toInt() ?? 0;
+          });
+        }
+      }
+
+      int caloriesSum = 0;
       List<Map<String, dynamic>> items = [];
 
       // Include all meal type collections
@@ -85,11 +104,23 @@ class _TotalScreenState extends State<TotalScreen> {
         'snack_calories'
       ];
 
-      // Reset meal-specific calories
-      breakfastCalories = 0;
-      lunchCalories = 0;
-      dinnerCalories = 0;
-      snackCalories = 0;
+      // Add recipe collections
+      List<String> recipeCategories = [
+        'breakfast_recipe_calories',
+        'lunch_recipe_calories',
+        'dinner_recipe_calories',
+        'snack_recipe_calories'
+      ];
+
+      categories.addAll(recipeCategories);
+
+      // Reset meal-specific calories if we didn't get them from daily_meals
+      if (!dailyMealDoc.exists) {
+        breakfastCalories = 0;
+        lunchCalories = 0;
+        dinnerCalories = 0;
+        snackCalories = 0;
+      }
 
       // Format date for comparison (start and end of selected day)
       final startOfDay = DateTime(
@@ -141,26 +172,23 @@ class _TotalScreenState extends State<TotalScreen> {
             'mealType': mealType,
           });
 
-          if (data['calories'] is num) {
-            caloriesSum += data['calories'];
+          if (data['calories'] is num && !dailyMealDoc.exists) {
+            final caloriesInt = (data['calories'] as num).toInt();
+            caloriesSum += caloriesInt;
 
             // Track calories by meal type (determined by time)
-            switch(mealType) {
-              case 'Breakfast':
+            switch(mealType.toLowerCase()) {
               case 'breakfast':
-                breakfastCalories += data['calories'];
+                breakfastCalories += caloriesInt;
                 break;
-              case 'Lunch':
               case 'lunch':
-                lunchCalories += data['calories'];
+                lunchCalories += caloriesInt;
                 break;
-              case 'Dinner':
               case 'dinner':
-                dinnerCalories += data['calories'];
+                dinnerCalories += caloriesInt;
                 break;
-              case 'Snack':
               case 'snack':
-                snackCalories += data['calories'];
+                snackCalories += caloriesInt;
                 break;
             }
           }
@@ -177,7 +205,11 @@ class _TotalScreenState extends State<TotalScreen> {
 
       setState(() {
         clickedItems = items;
-        totalCalories = caloriesSum;
+        if (!dailyMealDoc.exists) {
+          totalCalories = caloriesSum;
+          // Update daily_meals document for future reference
+          _updateDailyTotals();
+        }
         isLoading = false;
       });
 
@@ -189,6 +221,13 @@ class _TotalScreenState extends State<TotalScreen> {
       setState(() {
         isLoading = false;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading data: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -222,38 +261,71 @@ class _TotalScreenState extends State<TotalScreen> {
     final lastDay = DateTime(selectedDate.year, selectedDate.month + 1, 0);
 
     try {
-      Map<DateTime, num> totals = {};
-      List<String> categories = [
-        'vegetable_calories',
-        'fruit_calories',
-        'grain_calories',
-        'dairy_calories',
-        'bakery_calories',
-        'protein_calories',
-        'beverage_calories',
-        'breakfast_calories',
-        'lunch_calories',
-        'dinner_calories',
-        'snack_calories'
-      ];
+      Map<DateTime, int> totals = {};
 
-      for (String category in categories) {
-        final querySnapshot = await userRef.collection(category)
-            .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
-            .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
-            .get();
+      // First try to get data from daily_meals collection
+      final querySnapshot = await userRef.collection('daily_meals')
+          .get();
 
-        for (var doc in querySnapshot.docs) {
+      for (var doc in querySnapshot.docs) {
+        try {
           final data = doc.data();
-          if (data['timestamp'] != null && data['calories'] is num) {
-            final timestamp = data['timestamp'] as Timestamp;
-            final date = timestamp.toDate();
-            final dayDate = DateTime(date.year, date.month, date.day);
+          if (data['totalCalories'] != null) {
+            // Parse the date from the document ID (format: yyyy-MM-dd)
+            final dateStr = doc.id;
+            final dateParts = dateStr.split('-');
+            if (dateParts.length == 3) {
+              final year = int.parse(dateParts[0]);
+              final month = int.parse(dateParts[1]);
+              final day = int.parse(dateParts[2]);
+              final date = DateTime(year, month, day);
 
-            if (totals.containsKey(dayDate)) {
-              totals[dayDate] = totals[dayDate]! + data['calories'];
-            } else {
-              totals[dayDate] = data['calories'];
+              // Only include dates in the current month
+              if (date.isAfter(firstDay.subtract(Duration(days: 1))) &&
+                  date.isBefore(lastDay.add(Duration(days: 1)))) {
+                totals[date] = (data['totalCalories'] as num).toInt();
+              }
+            }
+          }
+        } catch (e) {
+          print("Error parsing date from document: $e");
+        }
+      }
+
+      // If we don't have data for all days, fetch from individual collections
+      if (totals.length < lastDay.day) {
+        List<String> categories = [
+          'vegetable_calories',
+          'fruit_calories',
+          'grain_calories',
+          'dairy_calories',
+          'bakery_calories',
+          'protein_calories',
+          'beverage_calories',
+          'breakfast_calories',
+          'lunch_calories',
+          'dinner_calories',
+          'snack_calories'
+        ];
+
+        for (String category in categories) {
+          final querySnapshot = await userRef.collection(category)
+              .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDay))
+              .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(lastDay))
+              .get();
+
+          for (var doc in querySnapshot.docs) {
+            final data = doc.data();
+            if (data['timestamp'] != null && data['calories'] is num) {
+              final timestamp = data['timestamp'] as Timestamp;
+              final date = timestamp.toDate();
+              final dayDate = DateTime(date.year, date.month, date.day);
+
+              if (totals.containsKey(dayDate)) {
+                totals[dayDate] = totals[dayDate]! + (data['calories'] as num).toInt();
+              } else {
+                totals[dayDate] = (data['calories'] as num).toInt();
+              }
             }
           }
         }
@@ -267,16 +339,42 @@ class _TotalScreenState extends State<TotalScreen> {
     }
   }
 
+  Future<void> _updateDailyTotals() async {
+    // Logic for updating daily totals
+    final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
+    final dailyMealsRef = userRef.collection('daily_meals').doc(dateStr);
+
+    await dailyMealsRef.set({
+      'totalCalories': totalCalories,
+      'breakfastCalories': breakfastCalories,
+      'lunchCalories': lunchCalories,
+      'dinnerCalories': dinnerCalories,
+      'snackCalories': snackCalories,
+      'lastUpdated': Timestamp.now(),
+    }, SetOptions(merge: true));
+  }
+
   Future<void> _fetchCalorieGoal() async {
     try {
       final userDoc = await userRef.get();
       if (userDoc.exists) {
         final data = userDoc.data() as Map<String, dynamic>?;
-        if (data != null && data['preferences'] != null) {
-          final prefs = data['preferences'] as Map<String, dynamic>;
-          setState(() {
-            dailyCalorieGoal = (prefs['calorieGoal'] as num?)?.toInt() ?? 2000;
-          });
+        if (data != null) {
+          // Try to get from preferences first
+          if (data['preferences'] != null) {
+            final prefs = data['preferences'] as Map<String, dynamic>;
+            setState(() {
+              dailyCalorieGoal = (prefs['calorieGoal'] as num?)?.toInt() ?? 2000;
+            });
+            return;
+          }
+
+          // Fallback to direct calorieGoal field
+          if (data.containsKey('calorieGoal')) {
+            setState(() {
+              dailyCalorieGoal = (data['calorieGoal'] as num?)?.toInt() ?? 2000;
+            });
+          }
         }
       }
     } catch (e) {
@@ -352,7 +450,7 @@ class _TotalScreenState extends State<TotalScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${dailyTotals[dayDate]!.toInt()}',
+                            '${dailyTotals[dayDate]!}',
                             style: TextStyle(
                               color: Colors.green,
                               fontSize: 10,
@@ -409,7 +507,7 @@ class _TotalScreenState extends State<TotalScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${totalCalories.toStringAsFixed(0)} kcal',
+                        '$totalCalories kcal',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -691,7 +789,7 @@ class _TotalScreenState extends State<TotalScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const SummaryScreen()),
-          );
+          ).then((_) => _fetchClickedItems());
         },
         backgroundColor: const Color(0xFF00FF62),
         child: const Icon(Icons.pie_chart),
@@ -785,7 +883,7 @@ class _TotalScreenState extends State<TotalScreen> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
               // Progress
@@ -794,7 +892,7 @@ class _TotalScreenState extends State<TotalScreen> {
                 width: MediaQuery.of(context).size.width * percentage * 0.8, // Adjust for padding
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
             ],
@@ -810,40 +908,49 @@ class _TotalScreenState extends State<TotalScreen> {
       final data = docSnapshot.data() as Map<String, dynamic>?;
       final calories = data?['calories'] ?? 0;
       final timestamp = data?['timestamp'] as Timestamp?;
+      final mealType = data?['mealType'] as String? ??
+          (timestamp != null ? _determineMealTypeByTime(timestamp.toDate()) : 'Snack');
+
       await userRef.collection(category).doc(id).delete();
 
       // Update the UI
       setState(() {
         clickedItems.removeWhere((item) => item['id'] == id && item['category'] == category);
-        totalCalories -= calories;
+        // Convert calories to int before subtracting
+        final caloriesInt = (calories is num) ? calories.toInt() : 0;
+        totalCalories -= caloriesInt;
 
-        // Update meal-specific calories based on time of day
-        if (timestamp != null) {
-          final itemDate = timestamp.toDate();
-          final mealType = data?['mealType'] as String? ?? _determineMealTypeByTime(itemDate);
-          final lowerCaseMealType = mealType.toLowerCase();
-
-          switch(lowerCaseMealType) {
-            case 'breakfast':
-              breakfastCalories -= calories;
-              break;
-            case 'lunch':
-              lunchCalories -= calories;
-              break;
-            case 'dinner':
-              dinnerCalories -= calories;
-              break;
-            case 'snack':
-              snackCalories -= calories;
-              break;
-          }
+        // Update meal-specific calories
+        final lowerCaseMealType = mealType.toLowerCase();
+        switch(lowerCaseMealType) {
+          case 'breakfast':
+            breakfastCalories -= caloriesInt;
+            break;
+          case 'lunch':
+            lunchCalories -= caloriesInt;
+            break;
+          case 'dinner':
+            dinnerCalories -= caloriesInt;
+            break;
+          case 'snack':
+            snackCalories -= caloriesInt;
+            break;
         }
       });
 
       // Update daily totals
+      await _updateDailyTotals();
+
+      // Refresh daily totals for calendar
       _fetchDailyTotals();
     } catch (e) {
       print("Error deleting item: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting item: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

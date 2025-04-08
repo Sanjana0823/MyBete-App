@@ -529,46 +529,6 @@ class VegetablesScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Bottom Navigation Bar
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  NavBarItem(
-                    icon: Icons.menu_book,
-                    color: Colors.blue,
-                    isSelected: true,
-                  ),
-                  NavBarItem(
-                    icon: Icons.favorite,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.fitness_center,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.person,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
