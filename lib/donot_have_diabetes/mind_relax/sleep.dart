@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/mind_relax.dart';
-//import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep2.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep_dashboard.dart';
 
 void main() {
@@ -46,134 +45,140 @@ class WelcomeScreen extends StatelessWidget {
 
           // Main content
           SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Back button
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, size: 28),
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context); // Go back if possible
-                      } else {
-                        Navigator.pushReplacement(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Back button
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, size: 28),
+                      onPressed: () {
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MindRelaxDashboard()),
+                          );
+                        }
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+
+                  // Moon icon
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.nightlight_round,
+                          color: Color(0xFFE6E7F2),
+                          size: 50,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Welcome text
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: const [
+                        Text(
+                          'Welcome to Sleep',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 24),
+                        Text(
+                          'Discover the DreamWave. It harmonizes soothing frequencies with gentle visual rhythms to guide your mind into a state of deep relaxation, creating the perfect atmosphere for rejuvenating sleep.',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 60),
+
+                  // Get Started button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 32.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  MindRelaxDashboard()), // Replace with actual previous screen
+                          MaterialPageRoute(builder: (context) => SleepApp()),
                         );
-                      }
-                    },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ),
-
-                // Moon icon
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.nightlight_round,
-                        color: Color(0xFFE6E7F2),
-                        size: 50,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Spacer(flex: 1),
-
-                // Welcome text
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Welcome to Sleep',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8E97FD),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(38),
                         ),
-                        textAlign: TextAlign.center,
+                        elevation: 0,
                       ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Discover the DreamWave. It harmonizes soothing frequencies with gentle visual rhythms to guide your mind into a state of deep relaxation, creating the perfect atmosphere for rejuvenating sleep.',
+                      child: const Text(
+                        'GET STARTED',
                         style: TextStyle(
-                          color: Colors.white,
                           fontSize: 16,
-                          height: 1.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.0,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Spacer(flex: 2),
-
-                // Get Started button
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 32.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                 SleepApp()), // Navigate to Sleep2 screen
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8E97FD),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(38),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'GET STARTED',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.0,
                       ),
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
+          ),
 
-                // Bottom navigation
-                Container(
-                  height: 70,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF03174C),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildNavItem(Icons.book_outlined),
-                      buildNavItem(Icons.favorite_border),
-                      buildNavItem(Icons.fitness_center),
-                      buildNavItem(Icons.person_outline),
-                    ],
-                  ),
+          // Bottom nav bar
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SafeArea(
+              top: false,
+              child: Container(
+                height: 70,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF03174C),
                 ),
-              ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    buildNavItem(Icons.book_outlined),
+                    buildNavItem(Icons.favorite_border),
+                    buildNavItem(Icons.fitness_center),
+                    buildNavItem(Icons.person_outline),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -233,8 +238,12 @@ class WelcomeScreen extends StatelessWidget {
     ];
   }
 
-  Widget buildStar(
-      {double? top, double? left, double? right, required double size}) {
+  Widget buildStar({
+    double? top,
+    double? left,
+    double? right,
+    required double size,
+  }) {
     return Positioned(
       top: top,
       left: left,

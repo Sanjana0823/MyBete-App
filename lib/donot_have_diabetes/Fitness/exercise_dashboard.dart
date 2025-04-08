@@ -5,6 +5,7 @@ import 'yoga_session_page.dart';
 import 'strength_toning_page.dart';
 import 'cardio_workout_page.dart';
 
+
 class ExerciseDashboard extends StatelessWidget {
   ExerciseDashboard({Key? key}) : super(key: key);
 
@@ -120,7 +121,6 @@ class ExerciseDashboard extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-<<<<<<< HEAD
   return Container(
     height: 250,
     decoration: BoxDecoration(
@@ -167,86 +167,13 @@ class ExerciseDashboard extends StatelessWidget {
               fontSize: 16,
               color: Colors.white70,
               
-=======
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            primaryBlue,
-            darkBlue,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: darkBlue.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Background pattern
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.1,
-              child: CustomPaint(
-                painter: PatternPainter(),
-              ),
-            ),
-          ),
-          // Content
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 5),
-                  const Text(
-                    'Welcome Back!',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'HI Continue your fitness journey today!!!!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Wave bottom
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomPaint(
-              painter: WavePainter(color: Colors.white),
-              child: const SizedBox(height: 20),
->>>>>>> 6b4cc03 (Created a header container with a linear gradient background)
             ),
           ),
         ],
       ),
-<<<<<<< HEAD
     ),
   );
 }
-=======
-    );
-  }
->>>>>>> 6b4cc03 (Created a header container with a linear gradient background)
 
   Widget _buildStatistics() {
     return Container(
@@ -659,14 +586,4 @@ class PatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-<<<<<<< HEAD
-<<<<<<< HEAD
 }
-
-=======
-}
->>>>>>> fitness
-=======
-}
-
->>>>>>> 6b4cc03 (Created a header container with a linear gradient background)

@@ -1,4 +1,4 @@
-mport 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class StepCounterPage extends StatefulWidget {
