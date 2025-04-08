@@ -77,6 +77,7 @@ dependencies:
   audioplayers: ^5.2.1
   just_audio: ^0.9.36
   just_audio_background: ^0.0.1-beta.10
+  video_player: ^2.9.5
 
 dependency_overrides:
   shared_preferences_android: 2.4.8
@@ -132,6 +133,10 @@ flutter:
     - lib/donot_have_diabetes/mind_relax/audio/sleep/
     - lib/donot_have_diabetes/mind_relax/audio/meditation/
     - lib/donot_have_diabetes/mind_relax/audio/classical/
+
+    - /videos/bodyweight squat.mp4/
+    - /videos/Dumbbel Shoulder Press.mp4/
+    - /videos/bodyweight squat.mp4/
 
   #    - assets/images/onboard_img_1.svg
 
