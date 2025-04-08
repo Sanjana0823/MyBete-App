@@ -138,11 +138,11 @@ class _MindRelaxQuestionnairePageState extends State<MindRelaxQuestionnairePage>
                   children: const [
                     Text(
                       'Mind Relax',
-                      style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Questionnaire',
-                      style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -174,7 +174,7 @@ class _MindRelaxQuestionnairePageState extends State<MindRelaxQuestionnairePage>
                     const Text(
                       'To get started, confirm your age:',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 24),
                     InkWell(
@@ -205,12 +205,12 @@ class _MindRelaxQuestionnairePageState extends State<MindRelaxQuestionnairePage>
                           const SizedBox(width: 16),
                           const Text(
                             '16 Years or Older',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 30),
                     // Display error message if not selected
                     if (_showError)
                       const Text(
@@ -226,7 +226,7 @@ class _MindRelaxQuestionnairePageState extends State<MindRelaxQuestionnairePage>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 90),
                       ),
                       child: const Text(
                         'Get Start',

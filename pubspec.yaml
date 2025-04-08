@@ -127,6 +127,9 @@ flutter:
     - lib/donot_have_diabetes/mind_relax/audio/jazz/
     - lib/donot_have_diabetes/mind_relax/audio/night/
     - lib/donot_have_diabetes/mind_relax/audio/rain/
+    - lib/donot_have_diabetes/mind_relax/audio/sleep/
+    - lib/donot_have_diabetes/mind_relax/audio/meditation/
+    - lib/donot_have_diabetes/mind_relax/audio/classical/
 
   #    - assets/images/onboard_img_1.svg
 
