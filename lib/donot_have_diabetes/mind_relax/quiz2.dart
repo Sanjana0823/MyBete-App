@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz1.dart';
-import 'package:mybete_app/donot_have_diabetes/mind_relax/result_screen.dart'; // Import Quiz1
+import 'package:mybete_app/donot_have_diabetes/mind_relax/result_screen.dart'; // Import ResultScreen
+import 'package:mybete_app/donot_have_diabetes/mind_relax/resources_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firebase Firestore
 
 void main() {
   runApp(const Quiz2());
@@ -35,6 +37,7 @@ class _RelaxationPreferencesScreenState
   String? relaxationType;
   String? sessionType;
   String? breathingExercise;
+  bool _showError = false; // Error message flag
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +66,11 @@ class _RelaxationPreferencesScreenState
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Handle skip action
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Quiz1()),
+                        );// Handle skip action
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF5EB7CF),
@@ -119,7 +126,7 @@ class _RelaxationPreferencesScreenState
                         },
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
                       // Question 5
                       QuestionCard(
@@ -135,7 +142,7 @@ class _RelaxationPreferencesScreenState
                         },
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
                       // Question 6
                       QuestionCard(
@@ -154,39 +161,64 @@ class _RelaxationPreferencesScreenState
                 ),
               ),
 
-              // Next button
+              // Error message if any question is not answered
+              if (_showError)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Please answer all the questions before submitting.',
+                    style: TextStyle(color: Colors.red, fontSize: 16),
+                  ),
+                ),
+
+              // Submit button
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0, top: 16.0),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, String?>? ?? {};
+                      // Check if all questions have been answered
+                      if (relaxationType == null ||
+                          sessionType == null ||
+                          breathingExercise == null) {
+                        setState(() {
+                          _showError = true; // Show error message
+                        });
+                        return;
+                      }
 
-                            final quiz1Answers = {
-                              'mood': arguments['selectedMood'],
-                              'stressLevel': arguments['selectedStressLevel'],
-                              'gratitude': arguments['selectedGratitude'],
-                            };
+                      // If all answers are provided, get the arguments from Quiz1
+                      final arguments = ModalRoute.of(context)?.settings.arguments
+                              as Map<String, String?>? ??
+                          {};
 
-                            final quiz2Answers = {
-                              'sleepHours': relaxationType,
-                              'wakeUpNight': sessionType,
-                              'musicHelps': breathingExercise,
-                            };
+                      final quiz1Answers = {
+                        'mood': arguments['selectedMood'],
+                        'stressLevel': arguments['selectedStressLevel'],
+                        'gratitude': arguments['selectedGratitude'],
+                      };
 
-                            // Navigate to results screen with the answers
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ResultScreen(
-                                  quiz1Answers: quiz1Answers,
-                                  quiz2Answers: quiz2Answers,
-                                ),
-                              ),
-                            );
-                    }, // Handle next action
+                      final quiz2Answers = {
+                        'sleepHours': relaxationType,
+                        'wakeUpNight': sessionType,
+                        'musicHelps': breathingExercise,
+                      };
 
+                      // Save to Firebase
+                      saveAnswersToFirebase(quiz1Answers, quiz2Answers);
+
+                      // Navigate to the ResultScreen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ResultScreen(
+                            quiz1Answers: quiz1Answers,
+                            quiz2Answers: quiz2Answers,
+                          ),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5EB7CF),
                       foregroundColor: Colors.white,
@@ -208,6 +240,24 @@ class _RelaxationPreferencesScreenState
         ),
       ),
     );
+  }
+
+  // Function to save the answers to Firebase Firestore
+  Future<void> saveAnswersToFirebase(
+      Map<String, String?> quiz1Answers, Map<String, String?> quiz2Answers) async {
+    try {
+      final userAnswers = {
+        'quiz1': quiz1Answers,
+        'quiz2': quiz2Answers,
+      };
+
+      // Get a reference to the Firestore collection
+      final firestore = FirebaseFirestore.instance;
+      await firestore.collection('user_answers').add(userAnswers);
+      print("Answers saved to Firebase.");
+    } catch (e) {
+      print("Error saving answers to Firebase: $e");
+    }
   }
 }
 
@@ -269,6 +319,7 @@ class QuestionCard extends StatelessWidget {
                 activeColor: const Color.fromARGB(255, 113, 180, 200),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
               )),
+
         ],
       ),
     );

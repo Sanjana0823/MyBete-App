@@ -90,5 +90,5 @@ class FileUtils {
       debugPrint("Error deleting file: $e");
       return false;
     }
-  }
+    }
 }

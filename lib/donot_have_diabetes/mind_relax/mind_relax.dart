@@ -3,8 +3,8 @@ import 'package:mybete_app/donot_have_diabetes/meal_plans/meal.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/quiz.dart';
 import 'package:mybete_app/donot_have_diabetes/Fitness/exercise.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/sleep.dart';
-import 'package:mybete_app/donot_have_diabetes/meal_plans/meal.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/music.dart';
+import 'package:mybete_app/donot_have_diabetes/donot_have_diabete.dart'; // Import for back navigation
 
 void main() {
   runApp(const MindRelaxDashboard());
@@ -16,11 +16,16 @@ class MindRelaxDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mental Health App',
+      title: 'Mind Relax',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.blue,
+        scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Poppins',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          elevation: 0,
+        ),
       ),
       home: const HomePage(),
     );
@@ -37,20 +42,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 1;
 
-  //navigation bar
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
     if (index == 0) {
-      // Meal Plan Page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => MealPlannerScreen()),
       );
     } else if (index == 2) {
-      // Fitness Page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Exercise()),
@@ -58,87 +60,166 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Function to handle back button press
+  void _goBackToDiabetesDashboard() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => DonotHaveDiabeteDashboard()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-
-              // Mental Health Questionnaire Card
-              FeatureCard(
-                title: 'Mental Health Questionnaire',
-                description:
-                    'Regular mental health check-ins help you stay proactive, identify risks, and maintain balance in daily life.',
-                buttonText: 'Take Questionnaire',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Quiz()), // Navigate to QuizPage
-                  );
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // Sleep Card
-              FeatureCard(
-                title: 'Sleep',
-                description:
-                    'Quality sleep is essential for mental and physical well-being. Prioritize rest to improve mood, focus, and overall health.',
-                buttonText: 'Get Start',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Sleep()), // Navigate to Sleep screen
-                  );
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              const SizedBox(height: 20),
-              // Meditate Card
-              FeatureCard(
-                title: 'Meditate and relax music',
-                description:
-                    'Meditation and relaxing music can help reduce stress, improve focus, and promote a sense of calm for better well-being.',
-                buttonText: 'Get Start',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            music()), // Navigate to Sleep screen
-                  );
-                },
-              ),
-              
-              const SizedBox(height: 20),
-            ],
+      appBar: AppBar(
+        title: const Text(
+          'Mind Relax',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
           ),
+        ),
+        centerTitle: true,
+        // Add back button
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _goBackToDiabetesDashboard,
+        ),
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            const SizedBox(height: 16),
+            
+            // Welcome message
+            const Text(
+              'Welcome to Mind Relax',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            const Text(
+              'Choose an activity to improve your mental wellbeing',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Mental Health Questionnaire Card
+            ActivityCard(
+              title: 'Mental Health Questionnaire',
+              description: 'Take a quick assessment to understand your mental wellbeing',
+              icon: Icons.psychology,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Quiz()),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Sleep Card
+            ActivityCard(
+              title: 'Sleep Better',
+              description: 'Improve your sleep quality with guided relaxation techniques',
+              icon: Icons.nightlight_round,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Sleep()),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Meditation Card
+            ActivityCard(
+              title: 'Meditation & Music',
+              description: 'Calm your mind with soothing sounds and guided meditation',
+              icon: Icons.self_improvement,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Music()),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Quick tip
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.shade100),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    color: Colors.blue.shade700,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Tip of the Day',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Take a few deep breaths when feeling stressed. Breathe in for 4 counts, hold for 4, exhale for 6.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.book_outlined),
+            icon: Icon(Icons.restaurant_menu),
             label: 'Meal Plan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Mind_relax',
+            icon: Icon(Icons.self_improvement),
+            label: 'Mind Relax',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center), // Fitness Page
+            icon: Icon(Icons.fitness_center),
             label: 'Fitness',
           ),
           BottomNavigationBarItem(
@@ -147,98 +228,92 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.black,
         onTap: _onItemTapped,
-        showSelectedLabels: true,
-        showUnselectedLabels: false,
       ),
     );
   }
 }
 
-class FeatureCard extends StatelessWidget {
+class ActivityCard extends StatelessWidget {
   final String title;
   final String description;
-  final String buttonText;
-  final VoidCallback? onTap; // New parameter for button action
+  final IconData icon;
+  final VoidCallback onTap;
 
-  const FeatureCard({
+  const ActivityCard({
     Key? key,
     required this.title,
     required this.description,
-    required this.buttonText,
-    this.onTap, // Receive function for navigation
+    required this.icon,
+    required this.onTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF8DD3F2),
-        borderRadius: BorderRadius.circular(24.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              shadows: [
-                Shadow(
-                  offset: Offset(1.0, 1.0),
-                  blurRadius: 3.0,
-                  color: Color.fromRGBO(0, 0, 0, 0.3),
-                ),
-              ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: onTap, // Use the function passed as an argument
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4BAED1),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+          ],
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
               ),
-              elevation: 5,
-              shadowColor: Colors.black.withOpacity(0.3),
-            ),
-            child: Text(
-              buttonText,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              child: Icon(
+                icon,
+                color: Colors.blue,
+                size: 24,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey,
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+

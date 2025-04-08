@@ -16,23 +16,23 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
   // Default sleep time: 10 PM to 5 AM
   TimeOfDay _bedTime = const TimeOfDay(hour: 22, minute: 0);
   TimeOfDay _wakeTime = const TimeOfDay(hour: 5, minute: 0);
-  
+
   // Reminder messages
   String _bedtimeReminderMessage = "Time to sleep! Rest well for tomorrow.";
   String _wakeupReminderMessage = "Good morning! Time to start your day.";
-  
+
   // Reminder states
   bool _bedtimeReminderEnabled = false;
   bool _wakeupReminderEnabled = false;
-  
+
   late AnimationController _animationController;
   late Animation<double> _animation;
-  
+
   bool _isScheduleActive = false;
-  
+
   // Notifications
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  
+
   @override
   void initState() {
     super.initState();
@@ -40,114 +40,114 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-    
+
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
-    
+
     _animationController.forward();
-    
+
     // Initialize notifications
     _initializeNotifications();
-    
+
     // Load saved settings
     _loadSavedSettings();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   // Initialize notifications
   Future<void> _initializeNotifications() async {
     tz_init.initializeTimeZones();
-    
-    const AndroidInitializationSettings initializationSettingsAndroid = 
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-        
-    const DarwinInitializationSettings initializationSettingsIOS = 
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
-        
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings initializationSettingsIOS =
+    DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
     );
-    
+
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
     );
   }
-  
+
   // Load saved settings
   Future<void> _loadSavedSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     setState(() {
       // Load bedtime
       final bedtimeHour = prefs.getInt('bedtimeHour') ?? 22;
       final bedtimeMinute = prefs.getInt('bedtimeMinute') ?? 0;
       _bedTime = TimeOfDay(hour: bedtimeHour, minute: bedtimeMinute);
-      
+
       // Load wake-up time
       final wakeupHour = prefs.getInt('wakeupHour') ?? 5;
       final wakeupMinute = prefs.getInt('wakeupMinute') ?? 0;
       _wakeTime = TimeOfDay(hour: wakeupHour, minute: wakeupMinute);
-      
+
       // Load schedule state
       _isScheduleActive = prefs.getBool('isScheduleActive') ?? false;
-      
+
       // Load reminder states
       _bedtimeReminderEnabled = prefs.getBool('bedtimeReminderEnabled') ?? false;
       _wakeupReminderEnabled = prefs.getBool('wakeupReminderEnabled') ?? false;
-      
+
       // Load reminder messages
-      _bedtimeReminderMessage = prefs.getString('bedtimeReminderMessage') ?? 
+      _bedtimeReminderMessage = prefs.getString('bedtimeReminderMessage') ??
           "Time to sleep! Rest well for tomorrow.";
-      _wakeupReminderMessage = prefs.getString('wakeupReminderMessage') ?? 
+      _wakeupReminderMessage = prefs.getString('wakeupReminderMessage') ??
           "Good morning! Time to start your day.";
     });
   }
-  
+
   // Save settings
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Save bedtime
     prefs.setInt('bedtimeHour', _bedTime.hour);
     prefs.setInt('bedtimeMinute', _bedTime.minute);
-    
+
     // Save wake-up time
     prefs.setInt('wakeupHour', _wakeTime.hour);
     prefs.setInt('wakeupMinute', _wakeTime.minute);
-    
+
     // Save schedule state
     prefs.setBool('isScheduleActive', _isScheduleActive);
-    
+
     // Save reminder states
     prefs.setBool('bedtimeReminderEnabled', _bedtimeReminderEnabled);
     prefs.setBool('wakeupReminderEnabled', _wakeupReminderEnabled);
-    
+
     // Save reminder messages
     prefs.setString('bedtimeReminderMessage', _bedtimeReminderMessage);
     prefs.setString('wakeupReminderMessage', _wakeupReminderMessage);
   }
-  
+
   // Schedule notifications
   Future<void> _scheduleNotifications() async {
     // Cancel existing notifications
     await _flutterLocalNotificationsPlugin.cancelAll();
-    
+
     if (!_isScheduleActive) {
       return;
     }
-    
-    // Schedule bedtime reminder if enabled
+
+    //Schedule bedtime reminder if enabled
     if (_bedtimeReminderEnabled) {
       await _scheduleDailyNotification(
         id: 1,
@@ -157,7 +157,7 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
         minute: _bedTime.minute,
       );
     }
-    
+
     // Schedule wake-up reminder if enabled
     if (_wakeupReminderEnabled) {
       await _scheduleDailyNotification(
@@ -169,7 +169,7 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       );
     }
   }
-  
+
   // Schedule a daily notification
   Future<void> _scheduleDailyNotification({
     required int id,
@@ -186,12 +186,12 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       hour,
       minute,
     );
-    
+
     // If the time has already passed today, schedule for tomorrow
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
-    
+
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
@@ -219,12 +219,12 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
-  
+
   // Calculate sleep duration in hours
   double get _sleepDuration {
     double bedHours = _bedTime.hour + _bedTime.minute / 60.0;
     double wakeHours = _wakeTime.hour + _wakeTime.minute / 60.0;
-    
+
     // Handle overnight sleep (e.g., 10 PM to 5 AM)
     if (wakeHours < bedHours) {
       return (24 - bedHours) + wakeHours;
@@ -232,7 +232,7 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       return wakeHours - bedHours;
     }
   }
-  
+
   // Calculate start angle for the arc (in radians)
   double get _startAngle {
     // Convert bed time to a position on the clock (in radians)
@@ -240,24 +240,24 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
     double hourAngle = (_bedTime.hour % 12) / 12 * 2 * math.pi;
     double minuteAngle = _bedTime.minute / 60 * (2 * math.pi / 12);
     double angle = hourAngle + minuteAngle - math.pi / 2;
-    
+
     // Adjust for PM
     if (_bedTime.hour >= 12) {
       angle += math.pi;
     }
-    
+
     return angle;
   }
-  
+
   // Calculate sweep angle for the arc (in radians)
   double get _sweepAngle {
     // Convert sleep duration to radians
     double angle = _sleepDuration / 24 * 2 * math.pi;
-    
+
     // Ensure we're sweeping in the correct direction
     return angle;
   }
-  
+
   Future<void> _selectBedTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -276,21 +276,21 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
         );
       },
     );
-    
+
     if (picked != null && picked != _bedTime) {
       setState(() {
         _bedTime = picked;
         _animationController.reset();
         _animationController.forward();
       });
-      
+
       await _saveSettings();
       if (_isScheduleActive && _bedtimeReminderEnabled) {
         await _scheduleNotifications();
       }
     }
   }
-  
+
   Future<void> _selectWakeTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -309,28 +309,28 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
         );
       },
     );
-    
+
     if (picked != null && picked != _wakeTime) {
       setState(() {
         _wakeTime = picked;
         _animationController.reset();
         _animationController.forward();
       });
-      
+
       await _saveSettings();
       if (_isScheduleActive && _wakeupReminderEnabled) {
         await _scheduleNotifications();
       }
     }
   }
-  
+
   Future<void> _toggleSchedule() async {
     setState(() {
       _isScheduleActive = !_isScheduleActive;
     });
-    
+
     await _saveSettings();
-    
+
     if (_isScheduleActive) {
       await _scheduleNotifications();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -349,12 +349,12 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       );
     }
   }
-  
+
   // Edit reminder message
   Future<void> _editReminderMessage(bool isBedtime) async {
     final currentMessage = isBedtime ? _bedtimeReminderMessage : _wakeupReminderMessage;
     final controller = TextEditingController(text: currentMessage);
-    
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -396,14 +396,14 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   _wakeupReminderMessage = controller.text;
                 }
               });
-              
+
               await _saveSettings();
-              if (_isScheduleActive && 
-                  ((isBedtime && _bedtimeReminderEnabled) || 
-                   (!isBedtime && _wakeupReminderEnabled))) {
+              if (_isScheduleActive &&
+                  ((isBedtime && _bedtimeReminderEnabled) ||
+                      (!isBedtime && _wakeupReminderEnabled))) {
                 await _scheduleNotifications();
               }
-              
+
               Navigator.pop(context);
             },
             child: const Text(
@@ -415,13 +415,13 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       ),
     );
   }
-  
+
   String _formatTimeOfDay(TimeOfDay time) {
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
     final period = time.period == DayPeriod.am ? 'AM' : 'PM';
     return '$hour:${time.minute.toString().padLeft(2, '0')} $period';
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -446,7 +446,7 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
           child: Column(
             children: [
               const SizedBox(height: 20),
-              
+
               // Sleep duration info
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -470,9 +470,9 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Clock visualization
               SizedBox(
                 height: 300,
@@ -491,9 +491,9 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   },
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Time selection
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -519,9 +519,9 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 30),
-              
+
               // Bedtime reminder
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -603,9 +603,9 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Wake-up reminder
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -687,21 +687,21 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 30),
-              
+
               // Activate button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ElevatedButton(
                   onPressed: _toggleSchedule,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isScheduleActive 
-                      ? const Color(0xFF74C7E5) 
-                      : const Color(0xFF0048FF),
-                    foregroundColor: _isScheduleActive 
-                      ? const Color(0xFF03174C) 
-                      : Colors.white,
+                    backgroundColor: _isScheduleActive
+                        ? const Color(0xFF74C7E5)
+                        : const Color(0xFF0048FF),
+                    foregroundColor: _isScheduleActive
+                        ? const Color(0xFF03174C)
+                        : Colors.white,
                     minimumSize: const Size(double.infinity, 56),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
@@ -716,7 +716,7 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 30),
             ],
           ),
@@ -724,7 +724,7 @@ class _SleepScheduleScreenState extends State<SleepScheduleScreen> with SingleTi
       ),
     );
   }
-  
+
   Widget _buildTimeSelector({
     required String label,
     required TimeOfDay time,
@@ -780,50 +780,50 @@ class ClockPainter extends CustomPainter {
   final double sweepAngle;
   final TimeOfDay bedTime;
   final TimeOfDay wakeTime;
-  
+
   ClockPainter({
     required this.startAngle,
     required this.sweepAngle,
     required this.bedTime,
     required this.wakeTime,
   });
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) * 0.4;
-    
+
     // Draw clock face
     final clockPaint = Paint()
       ..color = const Color(0xFF1A2C65)
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(center, radius, clockPaint);
-    
+
     // Draw clock border
     final borderPaint = Paint()
       ..color = Colors.white24
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    
+
     canvas.drawCircle(center, radius, borderPaint);
-    
+
     // Draw hour markers
     final markerPaint = Paint()
       ..color = Colors.white54
       ..style = PaintingStyle.fill;
-    
+
     for (int i = 0; i < 12; i++) {
       final angle = i * (2 * math.pi / 12) - math.pi / 2;
       final markerRadius = i % 3 == 0 ? 6.0 : 3.0;
-      
+
       final markerCenter = Offset(
         center.dx + (radius - 15) * math.cos(angle),
         center.dy + (radius - 15) * math.sin(angle),
       );
-      
+
       canvas.drawCircle(markerCenter, markerRadius, markerPaint);
-      
+
       // Draw hour numbers
       if (i % 3 == 0) {
         final hour = i == 0 ? '12' : (i).toString();
@@ -838,18 +838,18 @@ class ClockPainter extends CustomPainter {
           ),
           textDirection: TextDirection.ltr,
         );
-        
+
         textPainter.layout();
-        
+
         final textCenter = Offset(
           center.dx + (radius - 40) * math.cos(angle) - textPainter.width / 2,
           center.dy + (radius - 40) * math.sin(angle) - textPainter.height / 2,
         );
-        
+
         textPainter.paint(canvas, textCenter);
       }
     }
-    
+
     // Draw AM/PM indicators
     final amPmTextPainter = TextPainter(
       text: const TextSpan(
@@ -861,13 +861,13 @@ class ClockPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     );
-    
+
     amPmTextPainter.layout();
     amPmTextPainter.paint(
-      canvas, 
+      canvas,
       Offset(center.dx - amPmTextPainter.width / 2, center.dy - radius / 2),
     );
-    
+
     final pmTextPainter = TextPainter(
       text: const TextSpan(
         text: 'PM',
@@ -878,20 +878,20 @@ class ClockPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     );
-    
+
     pmTextPainter.layout();
     pmTextPainter.paint(
-      canvas, 
+      canvas,
       Offset(center.dx - pmTextPainter.width / 2, center.dy + radius / 3),
     );
-    
+
     // Draw sleep arc
     final sleepPaint = Paint()
       ..color = const Color(0xFF74C7E5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 20
       ..strokeCap = StrokeCap.round;
-    
+
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 25),
       startAngle,
@@ -899,55 +899,55 @@ class ClockPainter extends CustomPainter {
       false,
       sleepPaint,
     );
-    
+
     // Draw bedtime indicator
     final bedTimePaint = Paint()
       ..color = const Color(0xFFF5C371)
       ..style = PaintingStyle.fill;
-    
+
     final bedTimeCenter = Offset(
       center.dx + (radius - 25) * math.cos(startAngle),
       center.dy + (radius - 25) * math.sin(startAngle),
     );
-    
+
     canvas.drawCircle(bedTimeCenter, 10, bedTimePaint);
-    
+
     // Draw wake time indicator
     final wakeTimePaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    
+
     final wakeTimeCenter = Offset(
       center.dx + (radius - 25) * math.cos(startAngle + sweepAngle),
       center.dy + (radius - 25) * math.sin(startAngle + sweepAngle),
     );
-    
+
     canvas.drawCircle(wakeTimeCenter, 10, wakeTimePaint);
-    
+
     // Draw moon icon in center
     final moonPaint = Paint()
       ..color = const Color(0xFFF5C371)
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(center, 30, moonPaint);
-    
+
     // Draw crescent
     final crescentPaint = Paint()
       ..color = const Color(0xFF03174C)
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(
       Offset(center.dx + 10, center.dy - 5),
       25,
       crescentPaint,
     );
   }
-  
+
   @override
   bool shouldRepaint(covariant ClockPainter oldDelegate) {
     return oldDelegate.startAngle != startAngle ||
-           oldDelegate.sweepAngle != sweepAngle ||
-           oldDelegate.bedTime != bedTime ||
-           oldDelegate.wakeTime != wakeTime;
-  }
+        oldDelegate.sweepAngle != sweepAngle ||
+        oldDelegate.bedTime != bedTime ||
+        oldDelegate.wakeTime !=wakeTime;
+    }
 }

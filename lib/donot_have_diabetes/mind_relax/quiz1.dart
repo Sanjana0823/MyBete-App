@@ -34,6 +34,7 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
   String? selectedMood;
   String? selectedStressLevel;
   String? selectedGratitude;
+  bool _showError = false; // Error message flag
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +55,7 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.black),
+                          icon: const Icon(Icons.arrow_back, color: Colors.black),
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
@@ -142,6 +142,16 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
               ),
             ),
 
+            // Error message (if any question is not answered)
+            if (_showError)
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Please answer all the questions before proceeding.',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              ),
+
             // Next Button
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -149,6 +159,16 @@ class _MoodCheckScreenState extends State<MoodCheckScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    // Check if all questions have been answered
+                    if (selectedMood == null ||
+                        selectedStressLevel == null ||
+                        selectedGratitude == null) {
+                      setState(() {
+                        _showError = true; // Show error message
+                      });
+                      return;
+                    }
+
                     // Create a map of the answers
                     final quiz1Answers = {
                       'selectedMood': selectedMood,

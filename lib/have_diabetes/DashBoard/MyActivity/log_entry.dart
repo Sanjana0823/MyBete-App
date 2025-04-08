@@ -81,19 +81,18 @@ class LogEntry {
     DateTime? updatedAt,
   }) {
     return LogEntry(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      date: date ?? this.date,
-      bloodSugar: bloodSugar ?? this.bloodSugar,
-      pills: pills ?? this.pills,
-      bloodPressure: bloodPressure ?? this.bloodPressure,
-      bodyWeight: bodyWeight ?? this.bodyWeight,
-      trackingMoment: trackingMoment ?? this.trackingMoment,
-      mealTime: mealTime ?? this.mealTime,
-      foodType: foodType ?? this.foodType,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        date: date ?? this.date,
+        bloodSugar: bloodSugar ?? this.bloodSugar,
+        pills: pills ?? this.pills,
+        bloodPressure: bloodPressure ?? this.bloodPressure,
+        bodyWeight: bodyWeight ?? this.bodyWeight,
+        trackingMoment: trackingMoment ?? this.trackingMoment,
+        mealTime: mealTime ?? this.mealTime,
+        foodType: foodType ?? this.foodType,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        );
+    }
 }
-

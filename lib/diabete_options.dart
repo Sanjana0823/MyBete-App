@@ -117,30 +117,38 @@ Widget userFriendlyButton(BuildContext context, String text, Color color,
         MaterialPageRoute(builder: (context) => nextPage),
       );
     },
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: color,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            offset: Offset(0, 4),
-            blurRadius: 10,
+    child: ConstrainedBox(
+      constraints: BoxConstraints(minWidth: 200, maxWidth: 300),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: color,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(0, 4),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        height: 60,
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.black38),
+              SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  text,
+                  style: TextStyle(color: Colors.black87, fontSize: 18),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      width: 220,
-      height: 60,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.black38),
-          SizedBox(width: 10),
-          Text(
-            text,
-            style: TextStyle(color: Colors.black87, fontSize: 18),
-          ),
-        ],
+        ),
       ),
     ),
   );

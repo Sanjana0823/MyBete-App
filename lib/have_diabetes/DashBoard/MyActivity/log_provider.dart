@@ -266,6 +266,5 @@ class LogProvider with ChangeNotifier {
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
-  }
+    }
 }
-

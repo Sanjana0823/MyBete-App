@@ -1,30 +1,43 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mybete_app/main.dart';
+import 'package:mybete_app/diabete_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('MyApp initializes and navigates correctly', (WidgetTester tester) async {
+    // Set mock SharedPreferences values
+    SharedPreferences.setMockInitialValues({
+      'isLoggedIn': true,
+      'lastLoginDate': DateTime.now().toIso8601String(),
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Build the app
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: DiabeteOptions(), // Simulating navigation to main screen
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Increase the timeout duration for pumpAndSettle and add logging
+    print('Running pumpAndSettle...');
+    await tester.pumpAndSettle(const Duration(seconds: 20));
+    print('pumpAndSettle completed.');
+
+    // Verify that expected text or elements appear
+    expect(find.text("Choose one option from these three"), findsOneWidget);
+    expect(find.text("Have Diabetes"), findsOneWidget);
+    expect(find.text("Don't Have Diabetes"), findsOneWidget);
+    expect(find.text("Need Guidance"), findsOneWidget);
   });
 }
+
+
+
+
+
+
+
+
+

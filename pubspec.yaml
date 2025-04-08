@@ -99,10 +99,11 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
   metrics_center: ^1.0.13
+  mocktail: ^1.0.4
 
   
 
-# For A on the generic Dart part of this file, see the
+# For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
@@ -120,14 +121,16 @@ flutter:
     - lib/donot_have_diabetes/meal_plans/meal_images/
     - lib/donot_have_diabetes/mind_relax/mind images/
     - lib/not_sure/symptom_levels/3_polyphagia_check/Images/
-    - lib/donot_have_diabetes/Fitness/ImagesFit/
     
     - lib/donot_have_diabetes/mind_relax/audio/ambient/
     - lib/donot_have_diabetes/mind_relax/audio/forest/
     - lib/donot_have_diabetes/mind_relax/audio/jazz/
     - lib/donot_have_diabetes/mind_relax/audio/night/
     - lib/donot_have_diabetes/mind_relax/audio/rain/
- 
+    - lib/donot_have_diabetes/mind_relax/audio/sleep/
+    - lib/donot_have_diabetes/mind_relax/audio/meditation/
+    - lib/donot_have_diabetes/mind_relax/audio/classical/
+
   #    - assets/images/onboard_img_1.svg
 
   #   - images/a_dot_ham.jpeg
@@ -307,5 +310,5 @@ flutter_native_splash:
   # with the info_plist_files parameter.  Remove only the # characters in the three lines below,
   # do not remove any spaces:
   #info_plist_files:
-  #  - 'ios/Runner/Info-Debug.plist'dependencies:
-  
+  #  - 'ios/Runner/Info-Debug.plist'
+  #  - 'ios/Runner/Info-Release.plist'
