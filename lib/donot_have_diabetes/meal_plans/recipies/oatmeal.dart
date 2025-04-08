@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   const RecipeDetailScreen({Key? key}) : super(key: key);
@@ -21,6 +22,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   final String recipeName = 'Oatmeal with Nuts & Fruits';
   final int calories = 300;
   final String category = 'breakfast';
+  // Always set this recipe as breakfast
+  final String mealType = 'Breakfast';
 
   // Get current user ID
   String? get currentUserId => _auth.currentUser?.uid;
@@ -43,6 +46,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         'name': recipeName,
         'calories': calories,
         'category': category,
+        'mealType': mealType, // Always set as breakfast
         'ingredients': [
           '½ cup rolled oats',
           '1 cup milk or water',
@@ -102,7 +106,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       // Get today's date
       final now = DateTime.now();
 
-      // Add to appropriate category collection
+      // Add to appropriate category collection - always as breakfast
       await _firestore
           .collection('users')
           .doc(currentUserId)
@@ -111,10 +115,47 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         'name': recipeName,
         'calories': calories,
         'timestamp': Timestamp.fromDate(now),
+        'mealType': mealType, // Always set as breakfast
+        'category': category,
+      });
+
+      // Update daily totals document for faster summary loading
+      final dateStr = DateFormat('yyyy-MM-dd').format(now);
+      final dailyRef = _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('daily_meals')
+          .doc(dateStr);
+
+      // Use transaction to safely update the counter
+      await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(dailyRef);
+
+        if (snapshot.exists) {
+          // Update existing document
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+          // Always update breakfast calories since this is a breakfast recipe
+          transaction.update(dailyRef, {
+            'breakfastCalories': (data['breakfastCalories'] ?? 0) + calories,
+            'totalCalories': (data['totalCalories'] ?? 0) + calories,
+          });
+        } else {
+          // Create new document
+          Map<String, dynamic> initialData = {
+            'date': dateStr,
+            'totalCalories': calories,
+            'breakfastCalories': calories, // Always add to breakfast
+            'lunchCalories': 0,
+            'dinnerCalories': 0,
+            'snackCalories': 0,
+          };
+          transaction.set(dailyRef, initialData);
+        }
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Calories added to your daily intake!')),
+        const SnackBar(content: Text('Calories added to your breakfast!')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -211,6 +252,26 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   textAlign: TextAlign.center,
                                 ),
 
+                                // Meal type badge
+                                Center(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.orange),
+                                    ),
+                                    child: const Text(
+                                      'Breakfast',
+                                      style: TextStyle(
+                                        color: Colors.orange,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
                                 const SizedBox(height: 24),
 
                                 // Ingredients
@@ -220,7 +281,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
-
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -240,7 +300,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
-
                                   ),
                                 ),
                                 const SizedBox(height: 8),

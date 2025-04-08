@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Added import for FirebaseAuth
 import 'total_screen.dart';
 
 void main() async {
@@ -30,8 +31,17 @@ class VegetablesScreen extends StatelessWidget {
 
   // Function to add calorie to Firestore
   void _addCalorieToFirebase(String name, int calories) async {
-    final userId = 'user123'; // Replace with actual user ID
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    // Check if user is signed in
+    if (_auth.currentUser == null) {
+      print("Error: No authenticated user found");
+      return;
+    }
+
+    // Initialize userRef with the current user's document
+    DocumentReference userRef = _firestore.collection('users').doc(_auth.currentUser!.uid);
 
     try {
       // Get the current total calorie count for the user
@@ -39,8 +49,10 @@ class VegetablesScreen extends StatelessWidget {
       int totalCalories = 0;
 
       if (userDoc.exists) {
+        // Cast the document data to Map to access fields
+        final userData = userDoc.data() as Map<String, dynamic>?;
         // If user document exists, fetch total calories (or set to 0 if not present)
-        totalCalories = userDoc.data()?['total_calories'] ?? 0;
+        totalCalories = userData?['total_calories'] ?? 0;
       }
 
       // Update the total calorie count by adding the vegetable's calories
@@ -51,11 +63,25 @@ class VegetablesScreen extends StatelessWidget {
         'total_calories': totalCalories,
       }, SetOptions(merge: true));
 
+      // Get current time to determine meal type
+      final now = DateTime.now();
+      final hour = now.hour;
+      String mealType = 'Snack';
+
+      if (hour >= 5 && hour < 11) {
+        mealType = 'Breakfast';
+      } else if (hour >= 11 && hour < 15) {
+        mealType = 'Lunch';
+      } else if (hour >= 17 && hour < 22) {
+        mealType = 'Dinner';
+      }
+
       // Optionally: You can also add a document in a subcollection for individual vegetables
       await userRef.collection('vegetable_calories').add({
         'name': name,
         'calories': calories,
         'timestamp': FieldValue.serverTimestamp(), // Adds a timestamp for the entry
+        'mealType': mealType,
       });
 
       print("Calories added successfully!");
@@ -169,7 +195,7 @@ class VegetablesScreen extends StatelessWidget {
 
                       // Low-Calorie Vegetables - HORIZONTAL SCROLLING
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -329,7 +355,7 @@ class VegetablesScreen extends StatelessWidget {
 
                       // Moderate-Calorie Vegetables - HORIZONTAL SCROLLING
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -444,7 +470,7 @@ class VegetablesScreen extends StatelessWidget {
 
                       // High-Calorie Vegetables - HORIZONTAL SCROLLING
                       SizedBox(
-                        height: 200, // Reduced height for consistency with other sections
+                        height: 217, // Reduced height for consistency with other sections
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -459,7 +485,6 @@ class VegetablesScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 12),
                               VegetableCard(
-                                // Removed the invalid height parameter
                                 name: 'Sweet potatoes',
                                 calories: 87,
                                 imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/sweet_potatoes.png',

@@ -61,7 +61,7 @@ class _L10RecipeDetailScreenState extends State<L10RecipeDetailScreen> {
           'Mix with spaghetti squash and serve!',
         ],
         'savedAt': FieldValue.serverTimestamp(),
-        'imagePath': 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg',
+        'imagePath': 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash with Tomato Sauce.png',
       };
 
       // Add recipe to user's saved recipes
@@ -137,7 +137,7 @@ class _L10RecipeDetailScreenState extends State<L10RecipeDetailScreen> {
         children: [
           // Background Image
           Image.asset(
-            'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg',
+            'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash with Tomato Sauce.png',
             height: double.infinity,
             width: double.infinity,
             fit: BoxFit.cover,

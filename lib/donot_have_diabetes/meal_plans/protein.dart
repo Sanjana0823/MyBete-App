@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'total_screen.dart';
 
 void main() async {
@@ -30,8 +31,17 @@ class AnimalProteinsScreen extends StatelessWidget {
 
   // Function to add calorie to Firestore
   void _addCalorieToFirebase(String name, int calories) async {
-    final userId = 'user123'; // Replace with actual user ID
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    // Check if user is signed in
+    if (_auth.currentUser == null) {
+      print("Error: No authenticated user found");
+      return;
+    }
+
+    // Initialize userRef with the current user's document
+    DocumentReference userRef = _firestore.collection('users').doc(_auth.currentUser!.uid);
 
     try {
       // Get the current total calorie count for the user
@@ -39,8 +49,10 @@ class AnimalProteinsScreen extends StatelessWidget {
       int totalCalories = 0;
 
       if (userDoc.exists) {
+        // Cast the document data to Map to access fields
+        final userData = userDoc.data() as Map<String, dynamic>?;
         // If user document exists, fetch total calories (or set to 0 if not present)
-        totalCalories = userDoc.data()?['total_calories'] ?? 0;
+        totalCalories = userData?['total_calories'] ?? 0;
       }
 
       // Update the total calorie count by adding the vegetable's calories
@@ -51,11 +63,25 @@ class AnimalProteinsScreen extends StatelessWidget {
         'total_calories': totalCalories,
       }, SetOptions(merge: true));
 
+      // Get current time to determine meal type
+      final now = DateTime.now();
+      final hour = now.hour;
+      String mealType = 'Snack';
+
+      if (hour >= 5 && hour < 11) {
+        mealType = 'Breakfast';
+      } else if (hour >= 11 && hour < 15) {
+        mealType = 'Lunch';
+      } else if (hour >= 17 && hour < 22) {
+        mealType = 'Dinner';
+      }
+
       // Optionally: You can also add a document in a subcollection for individual vegetables
-      await userRef.collection('vegetable_calories').add({
+      await userRef.collection('protein_calories').add({
         'name': name,
         'calories': calories,
         'timestamp': FieldValue.serverTimestamp(), // Adds a timestamp for the entry
+        'mealType': mealType,
       });
 
       print("Calories added successfully!");
@@ -83,7 +109,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                     child: const Icon(
                       Icons.arrow_back,
                       size: 30,
-                      color: Colors.black,
+
                     ),
                   ),
                 ],
@@ -106,7 +132,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -152,7 +178,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -161,7 +187,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -169,7 +195,7 @@ class AnimalProteinsScreen extends StatelessWidget {
 
                       // Low-Calorie Animal Proteins Grid
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -177,7 +203,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Egg Whites',
                                 calories: 52,
-                                imagePath: 'assets/egg_whites.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/egg_whites.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -187,7 +213,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Shrimp',
                                 calories: 85,
-                                imagePath: 'assets/shrimp.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/shrimp.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -197,7 +223,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Crab',
                                 calories: 82,
-                                imagePath: 'assets/crab.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/crab.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -207,7 +233,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Cod',
                                 calories: 82,
-                                imagePath: 'assets/crab.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cod.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -217,7 +243,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Tilapia',
                                 calories: 96,
-                                imagePath: 'assets/crab.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/tilapia.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -227,7 +253,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Scallops',
                                 calories: 69,
-                                imagePath: 'assets/crab.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/scallops.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -237,7 +263,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Clams',
                                 calories: 79,
-                                imagePath: 'assets/crab.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/shellfish.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -255,7 +281,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -264,7 +290,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -272,7 +298,7 @@ class AnimalProteinsScreen extends StatelessWidget {
 
                       // Moderate-Calorie Animal Proteins Grid
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 240, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -280,7 +306,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Chicken Breast (Skinless, Cooked)',
                                 calories: 165,
-                                imagePath: 'assets/chicken_breast.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chicken-breast.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -290,7 +316,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Turkey Breast (Cooked)',
                                 calories: 135,
-                                imagePath: 'assets/turkey_breast.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/thanksgiving.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -300,7 +326,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Lean Beef (Sirloin, Cooked)',
                                 calories: 250,
-                                imagePath: 'assets/lean_beef.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/protein.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -310,7 +336,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Pork Tenderloin',
                                 calories: 143,
-                                imagePath: 'assets/lean_beef.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/tenderloin.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -320,7 +346,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Salmon(Cooked)',
                                 calories: 206,
-                                imagePath: 'assets/lean_beef.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/tenderloin.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -330,7 +356,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Tuna (Canned in water, drained)',
                                 calories: 116,
-                                imagePath: 'assets/lean_beef.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/tuna.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -340,7 +366,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Lamb (Cooked, lean Cuts)',
                                 calories: 294,
-                                imagePath: 'assets/lean_beef.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/lamb.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -350,7 +376,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Duck (Without Skin, Cooked)',
                                 calories: 250,
-                                imagePath: 'assets/lean_beef.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/duck.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -368,7 +394,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -377,7 +403,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -385,7 +411,7 @@ class AnimalProteinsScreen extends StatelessWidget {
 
                       // High-Calorie Animal Proteins Grid
                       SizedBox(
-                        height: 200, // Reduced height for consistency with other sections
+                        height: 217, // Reduced height for consistency with other sections
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -393,7 +419,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Bacon',
                                 calories: 541,
-                                imagePath: 'assets/bacon.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/bacon.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -403,7 +429,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Salami',
                                 calories: 425,
-                                imagePath: 'assets/salami.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/salami.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -413,7 +439,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Pepperoni',
                                 calories: 494,
-                                imagePath: 'assets/pepperoni.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/pepperoni.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -423,7 +449,7 @@ class AnimalProteinsScreen extends StatelessWidget {
                               ProteinCard(
                                 name: 'Pork Belly',
                                 calories: 518,
-                                imagePath: 'assets/pepperoni.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/pork.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -458,44 +484,8 @@ class AnimalProteinsScreen extends StatelessWidget {
 
 
             // Bottom Navigation Bar
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  NavBarItem(
-                    icon: Icons.menu_book,
-                    color: Colors.blue,
-                    isSelected: true,
-                  ),
-                  NavBarItem(
-                    icon: Icons.favorite,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.fitness_center,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.person,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                ],
-              ),
-            ),
+
+
           ],
         ),
       ),

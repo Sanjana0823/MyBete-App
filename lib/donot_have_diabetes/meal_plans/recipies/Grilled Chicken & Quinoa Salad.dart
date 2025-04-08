@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class L1RecipeDetailScreen extends StatefulWidget {
   const L1RecipeDetailScreen({Key? key}) : super(key: key);
@@ -17,15 +18,13 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
   bool _isAddingCalories = false;
   bool _recipeSaved = false;
 
-  // Recipe data
   final String recipeName = 'Grilled Chicken & Quinoa Salad';
   final int calories = 400;
   final String category = 'lunch';
+  final String mealType = 'Lunch';
 
-  // Get current user ID
   String? get currentUserId => _auth.currentUser?.uid;
 
-  // Save recipe to user's saved recipes collection
   Future<void> _saveRecipe() async {
     if (_recipeSaved || _isSaving) return;
 
@@ -38,11 +37,11 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Create recipe data
       Map<String, dynamic> recipeData = {
         'name': recipeName,
         'calories': calories,
         'category': category,
+        'mealType': mealType,
         'ingredients': [
           '1 grilled chicken breast (sliced)',
           '½ cup cooked quinoa',
@@ -63,7 +62,6 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
         'imagePath': 'lib/donot_have_diabetes/meal_plans/meal_images/chicken_salad.jpg',
       };
 
-      // Add recipe to user's saved recipes
       await _firestore
           .collection('users')
           .doc(currentUserId)
@@ -88,7 +86,6 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
     }
   }
 
-  // Add calories to user's daily intake
   Future<void> _addCaloriesToDailyIntake() async {
     if (_isAddingCalories) return;
 
@@ -101,10 +98,8 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Get today's date
       final now = DateTime.now();
 
-      // Add to appropriate category collection
       await _firestore
           .collection('users')
           .doc(currentUserId)
@@ -113,10 +108,42 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
         'name': recipeName,
         'calories': calories,
         'timestamp': Timestamp.fromDate(now),
+        'mealType': mealType,
+        'category': category,
+      });
+
+      final dateStr = DateFormat('yyyy-MM-dd').format(now);
+      final dailyRef = _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('daily_meals')
+          .doc(dateStr);
+
+      await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(dailyRef);
+
+        if (snapshot.exists) {
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+          transaction.update(dailyRef, {
+            'lunchCalories': (data['lunchCalories'] ?? 0) + calories,
+            'totalCalories': (data['totalCalories'] ?? 0) + calories,
+          });
+        } else {
+          Map<String, dynamic> initialData = {
+            'date': dateStr,
+            'totalCalories': calories,
+            'breakfastCalories': 0,
+            'lunchCalories': calories,
+            'dinnerCalories': 0,
+            'snackCalories': 0,
+          };
+          transaction.set(dailyRef, initialData);
+        }
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Calories added to your daily intake!')),
+        const SnackBar(content: Text('Calories added to your lunch!')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -134,15 +161,12 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Image.asset(
             'lib/donot_have_diabetes/meal_plans/meal_images/chicken_salad.jpg',
             height: double.infinity,
             width: double.infinity,
             fit: BoxFit.cover,
           ),
-
-          // Semi-transparent overlay
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -155,13 +179,10 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
               ),
             ),
           ),
-
-          // Content
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back button
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: GestureDetector(
@@ -180,8 +201,6 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                     ),
                   ),
                 ),
-
-                // Recipe content
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
@@ -189,9 +208,7 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 180), // Space for the image
-
-                          // Recipe title container with rounded corners
+                          const SizedBox(height: 180),
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(20),
@@ -202,7 +219,6 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Title
                                 const Text(
                                   'Grilled Chicken & Quinoa Salad',
                                   style: TextStyle(
@@ -212,17 +228,31 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-
+                                Center(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.teal.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.teal),
+                                    ),
+                                    child: const Text(
+                                      'Lunch',
+                                      style: TextStyle(
+                                        color: Colors.teal,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 const SizedBox(height: 24),
-
-                                // Ingredients
                                 const Text(
                                   'Ingredients:',
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
-
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -234,17 +264,13 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                                 _buildBulletPoint('1 tbsp olive oil'),
                                 _buildBulletPoint('1 tbsp lemon juice'),
                                 _buildBulletPoint('Salt & pepper to taste'),
-
                                 const SizedBox(height: 24),
-
-                                // Instructions
                                 const Text(
                                   'Instructions:',
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
-
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -255,14 +281,10 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                                 _buildNumberedStep(3, 'Drizzle with olive oil and lemon juice, then season with salt & pepper.'),
                                 const SizedBox(height: 8),
                                 _buildNumberedStep(4, 'Toss gently and serve!'),
-
                                 const SizedBox(height: 32),
-
-                                // Bottom buttons
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Calories button
                                     GestureDetector(
                                       onTap: _addCaloriesToDailyIntake,
                                       child: Container(
@@ -290,16 +312,12 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
                                         ),
                                       ),
                                     ),
-
-                                    // Save button
                                     GestureDetector(
                                       onTap: _saveRecipe,
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                         decoration: BoxDecoration(
-                                          color: _recipeSaved
-                                              ? Colors.grey
-                                              : const Color(0xFF4A90E2),
+                                          color: _recipeSaved ? Colors.grey : const Color(0xFF4A90E2),
                                           borderRadius: BorderRadius.circular(30),
                                         ),
                                         child: _isSaving
@@ -339,7 +357,6 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
     );
   }
 
-  // Helper method to build bullet points
   Widget _buildBulletPoint(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4.0),
@@ -368,29 +385,31 @@ class _L1RecipeDetailScreenState extends State<L1RecipeDetailScreen> {
     );
   }
 
-  // Helper method to build numbered steps
   Widget _buildNumberedStep(int number, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$number. ',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            text,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$number. ',
             style: const TextStyle(
               fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),
-        ),
-      ],
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

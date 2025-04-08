@@ -6,7 +6,6 @@ import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Quinoa_Breakf
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Chia_Seed_Pudding.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Green_Smoothie.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Whole_Grain_Avocado_Toast.dart';
-import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Banana_Pancakes_(No Flour!).dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Tofu_Scramble _Vegan Egg Alternative).dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Banana_Smoothie_Bowl.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Grilled Chicken & Quinoa Salad.dart';
@@ -19,6 +18,23 @@ import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Mediterranean
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Baked Sweet Potato with Black Beans.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Shrimp & Avocado Salad.dart';
 import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Spaghetti Squash with Tomato Sauce.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Stuffed Bell Peppers.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Baked Cod with Roasted Vegetables.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Lemon Garlic Shrimp with Asparagus.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Grilled Veggie Skewers with Quinoa.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Cauliflower Fried Rice.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Grilled Chicken with Mango Salsa.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Spaghetti Squash Primavera.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Baked Lemon Herb Chicken with Broccoli.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Quinoa and Roasted Vegetable Bowl.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Veggie-Packed Cauliflower Crust Pizza.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Banana with Peanut Butter.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Greek Yogurt and Honey.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Carrot Sticks with Hummus.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Cucumber with Lemon and Salt.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Rice Cake with Nut Butter.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Mixed Nuts.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/recipies/Cheese and Crackers.dart';
 import 'vegetables.dart';
 import 'fruits.dart';
 import 'bakery.dart';
@@ -26,6 +42,10 @@ import 'grains.dart';
 import 'protein.dart';
 import 'dairy.dart';
 import 'beverages.dart';
+import 'package:mybete_app/donot_have_diabetes/meal_plans/meal.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 
 void main() {
@@ -48,15 +68,85 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class FoodCategoryScreen extends StatelessWidget {
+class FoodCategoryScreen extends StatefulWidget {
   final String mealType;
 
   const FoodCategoryScreen({Key? key, required this.mealType}) : super(key: key);
 
   @override
+  _FoodCategoryScreenState createState() => _FoodCategoryScreenState();
+}
+
+class _FoodCategoryScreenState extends State<FoodCategoryScreen> {
+  int dailyCalorieGoal = 2000;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCalorieGoal();
+  }
+
+  Future<void> _fetchCalorieGoal() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? 'user123';
+      final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+      final userDoc = await userRef.get();
+      if (userDoc.exists) {
+        final data = userDoc.data();
+        if (data != null && data['preferences'] != null) {
+          final prefs = data['preferences'];
+          setState(() {
+            dailyCalorieGoal = (prefs['calorieGoal'] as num?)?.toInt() ?? 2000;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching calorie goal: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _navigateToMealPlanner(BuildContext context) {
+    try {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MealPlannerScreen()),
+      ).then((_) {
+        // Refresh the current screen when returning from MealPlannerScreen
+        if (mounted) {
+          setState(() {
+            // This will trigger a rebuild of the screen
+          });
+        }
+      });
+    } catch (e) {
+      // Fallback if MealPlannerScreen is not available
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Meal Planner is not available')),
+      );
+      print('Error navigating to MealPlannerScreen: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
         child: Column(
           children: [
             // Status Bar and Back Button
@@ -87,23 +177,47 @@ class FoodCategoryScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 20),
 
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [
-                        Color(0xFF0066FF),
-                        Color(0xFF00CCFF),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ).createShader(bounds),
-                    child: const Text(
-                      'Select your Meal',
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [
+                            Color(0xFF0066FF),
+                            Color(0xFF00CCFF),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ).createShader(bounds),
+                        child: const Text(
+                          'Select your Meal',
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.local_fire_department, color: Colors.orange),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Goal: $dailyCalorieGoal kcal',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 18),
 
@@ -316,10 +430,15 @@ class FoodCategoryScreen extends StatelessWidget {
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/banana_pancake.png',
                           isFavorite: false,
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const B8RecipeDetailScreen()),
+                            // Show a message instead of navigating to a missing screen
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Recipe details coming soon')),
                             );
+                            // Original navigation code commented out
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) => const B8RecipeDetailScreen()),
+                            // );
                           },
                         ),
                         RecipeCard(
@@ -470,7 +589,7 @@ class FoodCategoryScreen extends StatelessWidget {
                         ),
                         RecipeCard(
                           title: 'Spaghetti Squash with Tomato Sauce',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash with Tomato Sauce.png',
                           isFavorite: false,
                           onTap: () {
                             Navigator.push(
@@ -508,61 +627,111 @@ class FoodCategoryScreen extends StatelessWidget {
                           title: 'Stuffed Bell Peppers',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/stuffed_peppers.png',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D1RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Baked Cod with Roasted Vegetables',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Baked Cod with Quinoa and Vegetables.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D2RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Lemon Garlic Shrimp with Asparagus',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Lemon Garlic Shrimp Pasta Recipe with Asparagus.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D3RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Grilled Veggie Skewers with Quinoa',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Easy Tofu Skewers (Grill or Oven!) - Two Spoons.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D4RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Cauliflower Fried Rice',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Cauliflower Fried Rice.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D5RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Grilled Chicken with Mango Salsa',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Refreshing grilled chicken with sweet mango salsa.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D6RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Spaghetti Squash Primavera',
-                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg ',
+                          imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Spaghetti Squash Primavera_ Healthy Pasta Recipe Idea.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D7RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Baked Lemon Herb Chicken with Broccoli',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/baked_lemon.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D8RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Quinoa and Roasted Vegetable Bowl',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Healthy Quinoa Salad with Roasted Vegetables - Gluten-Free & Delicious Recipe!.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D9RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Veggie-Packed Cauliflower Crust Pizza',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Cauliflower Crust Pizza.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const D10RecipeDetailScreen()),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -592,43 +761,78 @@ class FoodCategoryScreen extends StatelessWidget {
                           title: 'Banana with Peanut Butter',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Peanut Butter Banana Bites.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S1RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Greek Yogurt and Honey',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Greek Yogurt and Berries.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S2RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Carrot Sticks with Hummus',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Veggie Sticks & Hummus.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S3RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Cucumber with Lemon and Salt',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Easy Simple Green Salad.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S4RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Rice Cake with Nut Butter',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Rice Cake .png',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S5RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Mixed Nuts',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/Healthy Trail Mix.jpeg',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S6RecipeDetailScreen()),
+                            );
+                          },
                         ),
                         RecipeCard(
                           title: 'Cheese and Crackers',
                           imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cheese crackers.png',
                           isFavorite: false,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const S7RecipeDetailScreen()),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -640,46 +844,18 @@ class FoodCategoryScreen extends StatelessWidget {
             ),
 
             // Bottom Navigation Bar
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  NavBarItem(
-                    icon: Icons.menu_book,
-                    color: Colors.blue,
-                    isSelected: true,
-                  ),
-                  NavBarItem(
-                    icon: Icons.favorite,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.fitness_center,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.person,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                ],
-              ),
-            ),
+
+
+
+
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToMealPlanner(context),
+        backgroundColor: const Color(0xFF00B8FF),
+        child: const Icon(Icons.dashboard),
+        tooltip: 'Meal Dashboard',
       ),
     );
   }
@@ -856,3 +1032,4 @@ class NavBarItem extends StatelessWidget {
     );
   }
 }
+

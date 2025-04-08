@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'total_screen.dart'; // Add this line
+import 'package:firebase_auth/firebase_auth.dart';
+import 'total_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +32,17 @@ class BakeryItemsScreen extends StatelessWidget {
 
   // Function to add calorie to Firestore
   void _addCalorieToFirebase(String name, int calories) async {
-    final userId = 'user123'; // Replace with actual user ID
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    // Check if user is signed in
+    if (_auth.currentUser == null) {
+      print("Error: No authenticated user found");
+      return;
+    }
+
+    // Initialize userRef with the current user's document
+    DocumentReference userRef = _firestore.collection('users').doc(_auth.currentUser!.uid);
 
     try {
       // Get the current total calorie count for the user
@@ -40,8 +50,10 @@ class BakeryItemsScreen extends StatelessWidget {
       int totalCalories = 0;
 
       if (userDoc.exists) {
+        // Cast the document data to Map to access fields
+        final userData = userDoc.data() as Map<String, dynamic>?;
         // If user document exists, fetch total calories (or set to 0 if not present)
-        totalCalories = userDoc.data()?['total_calories'] ?? 0;
+        totalCalories = userData?['total_calories'] ?? 0;
       }
 
       // Update the total calorie count by adding the vegetable's calories
@@ -52,11 +64,25 @@ class BakeryItemsScreen extends StatelessWidget {
         'total_calories': totalCalories,
       }, SetOptions(merge: true));
 
+      // Get current time to determine meal type
+      final now = DateTime.now();
+      final hour = now.hour;
+      String mealType = 'Snack';
+
+      if (hour >= 5 && hour < 11) {
+        mealType = 'Breakfast';
+      } else if (hour >= 11 && hour < 15) {
+        mealType = 'Lunch';
+      } else if (hour >= 17 && hour < 22) {
+        mealType = 'Dinner';
+      }
+
       // Optionally: You can also add a document in a subcollection for individual vegetables
-      await userRef.collection('vegetable_calories').add({
+      await userRef.collection('bakery_calories').add({
         'name': name,
         'calories': calories,
         'timestamp': FieldValue.serverTimestamp(), // Adds a timestamp for the entry
+        'mealType': mealType,
       });
 
       print("Calories added successfully!");
@@ -85,7 +111,7 @@ class BakeryItemsScreen extends StatelessWidget {
                     child: const Icon(
                       Icons.arrow_back,
                       size: 30,
-                      color: Colors.black,
+
                     ),
                   ),
                 ],
@@ -108,7 +134,7 @@ class BakeryItemsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -169,7 +195,7 @@ class BakeryItemsScreen extends StatelessWidget {
 
                       // Low-Calorie Bakery Items Grid
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -177,7 +203,7 @@ class BakeryItemsScreen extends StatelessWidget {
                             BakeryItemCard(
                               name: 'White Bread',
                               calories: 265,
-                              imagePath: 'assets/white_bread.png',
+                              imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/white-bread.png',
                               onAdd: (name, calories) {
                                 _addCalorieToFirebase(name, calories);
                               },
@@ -187,7 +213,7 @@ class BakeryItemsScreen extends StatelessWidget {
                             BakeryItemCard(
                                 name: 'Whole Wheat Bread',
                                 calories: 247,
-                                imagePath: 'assets/whole_wheat_bread.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/whole wheat bread.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -197,7 +223,7 @@ class BakeryItemsScreen extends StatelessWidget {
                             BakeryItemCard(
                                 name: 'Multigrain Bread',
                                 calories: 250,
-                                imagePath: 'assets/multigrain_bread.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/multigrain bread.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -207,7 +233,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               BakeryItemCard(
                                 name: 'Rye Bread',
                                 calories: 259,
-                                imagePath: 'assets/multigrain_bread.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/rye bread.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -217,7 +243,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               BakeryItemCard(
                                 name: 'Baguette',
                                 calories: 270,
-                                imagePath: 'assets/multigrain_bread.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/baguette.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -227,7 +253,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               BakeryItemCard(
                                 name: 'Pita Bread',
                                 calories: 275,
-                                imagePath: 'assets/multigrain_bread.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/pita bread.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -237,7 +263,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               BakeryItemCard(
                                 name: 'Bagel(Plain)',
                                 calories: 250,
-                                imagePath: 'assets/multigrain_bread.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/bagel.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -255,7 +281,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+
                               ),
                             ),
 
@@ -264,7 +290,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+
                               ),
                             ),
 
@@ -272,7 +298,7 @@ class BakeryItemsScreen extends StatelessWidget {
 
                       // Moderate-Calorie Bakery Items Grid
                           SizedBox(
-                            height: 200, // Set a fixed height for the horizontal scroll area
+                            height: 217, // Set a fixed height for the horizontal scroll area
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
@@ -280,7 +306,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                     name: 'Croissant',
                                     calories: 406,
-                                    imagePath: 'assets/croissant.png',
+                                    imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/croissant.png',
                                     onAdd: (name, calories) {
                                       _addCalorieToFirebase(name, calories);
                                     },
@@ -290,7 +316,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                       name: 'Cinnamon roll',
                                       calories: 450,
-                                      imagePath: 'assets/cinnamon_roll.png',
+                                      imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cinnamon-roll.png',
                                       onAdd: (name, calories) {
                                         _addCalorieToFirebase(name, calories);
                                       },
@@ -299,7 +325,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                       name: 'Chocolate Cake',
                                       calories: 371,
-                                      imagePath: 'assets/chocolate_cake.png',
+                                      imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cake.png',
                                       onAdd: (name, calories) {
                                         _addCalorieToFirebase(name, calories);
                                       },
@@ -307,19 +333,9 @@ class BakeryItemsScreen extends StatelessWidget {
 
                                   const SizedBox(width: 12),
                                   BakeryItemCard(
-                                    name: 'Chocolate Cake',
-                                    calories: 371,
-                                    imagePath: 'assets/chocolate_cake.png',
-                                    onAdd: (name, calories) {
-                                      _addCalorieToFirebase(name, calories);
-                                    },
-                                  ),
-
-                                  const SizedBox(width: 12),
-                                  BakeryItemCard(
                                     name: 'Cheese Cake',
                                     calories: 321,
-                                    imagePath: 'assets/chocolate_cake.png',
+                                    imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cheese cake.png',
                                     onAdd: (name, calories) {
                                       _addCalorieToFirebase(name, calories);
                                     },
@@ -329,7 +345,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                     name: 'Banana Bread',
                                     calories: 326,
-                                    imagePath: 'assets/chocolate_cake.png',
+                                    imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/banana bread.png',
                                     onAdd: (name, calories) {
                                       _addCalorieToFirebase(name, calories);
                                     },
@@ -339,7 +355,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                     name: 'Cheese Bread',
                                     calories: 330,
-                                    imagePath: 'assets/chocolate_cake.png',
+                                    imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/cheese bread.png',
                                     onAdd: (name, calories) {
                                       _addCalorieToFirebase(name, calories);
                                     },
@@ -349,7 +365,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                     name: 'Pretzel',
                                     calories: 340,
-                                    imagePath: 'assets/chocolate_cake.png',
+                                    imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/pretzel.png',
                                     onAdd: (name, calories) {
                                       _addCalorieToFirebase(name, calories);
                                     },
@@ -359,7 +375,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                   BakeryItemCard(
                                     name: 'Garlic Bread',
                                     calories: 360,
-                                    imagePath: 'assets/chocolate_cake.png',
+                                    imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/garlic bread.png',
                                     onAdd: (name, calories) {
                                       _addCalorieToFirebase(name, calories);
                                     },
@@ -376,7 +392,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+
                               ),
                             ),
 
@@ -385,7 +401,7 @@ class BakeryItemsScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+
                               ),
                             ),
 
@@ -393,7 +409,7 @@ class BakeryItemsScreen extends StatelessWidget {
 
                             // High-Calorie Bakery Items Grid
                               SizedBox(
-                                height: 200, // Set a fixed height for the horizontal scroll area
+                                height: 217, // Set a fixed height for the horizontal scroll area
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
@@ -401,7 +417,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                       BakeryItemCard(
                                         name: 'Puff Pastry',
                                         calories: 558,
-                                        imagePath: 'assets/puff_pastry.png',
+                                        imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/puff pastry.png',
                                         onAdd: (name, calories) {
                                           _addCalorieToFirebase(name, calories);
                                         },
@@ -411,7 +427,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                       BakeryItemCard(
                                         name: 'Butter Cookies',
                                         calories: 520,
-                                        imagePath: 'assets/butter_cookies.png',
+                                        imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/butter cookies.png',
                                         onAdd: (name, calories) {
                                           _addCalorieToFirebase(name, calories);
                                         },
@@ -421,7 +437,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                       BakeryItemCard(
                                         name: 'Oatmeal Cookies',
                                         calories: 450,
-                                        imagePath: 'assets/oatmeal_cookies.png',
+                                        imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/oatmeal cookies.png',
                                         onAdd: (name, calories) {
                                         _addCalorieToFirebase(name, calories);
                                         },
@@ -431,7 +447,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                       BakeryItemCard(
                                         name: 'Glazed Donut',
                                         calories: 452,
-                                        imagePath: 'assets/oatmeal_cookies.png',
+                                        imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/glazed donut.png',
                                         onAdd: (name, calories) {
                                           _addCalorieToFirebase(name, calories);
                                         },
@@ -441,7 +457,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                       BakeryItemCard(
                                         name: 'Pound Cake',
                                         calories: 430,
-                                        imagePath: 'assets/oatmeal_cookies.png',
+                                        imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/pound cake.png',
                                         onAdd: (name, calories) {
                                           _addCalorieToFirebase(name, calories);
                                         },
@@ -451,7 +467,7 @@ class BakeryItemsScreen extends StatelessWidget {
                                       BakeryItemCard(
                                         name: 'Muffin',
                                         calories: 400,
-                                        imagePath: 'assets/oatmeal_cookies.png',
+                                        imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/muffin.png',
                                         onAdd: (name, calories) {
                                           _addCalorieToFirebase(name, calories);
                                         },
@@ -486,44 +502,8 @@ class BakeryItemsScreen extends StatelessWidget {
               ),
 
             // Bottom Navigation Bar
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  NavBarItem(
-                    icon: Icons.menu_book,
-                    color: Colors.blue,
-                    isSelected: true,
-                  ),
-                  NavBarItem(
-                    icon: Icons.favorite,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.fitness_center,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.person,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                ],
-              ),
-            ),
+
+
               ],
             ),
     ),
@@ -536,7 +516,7 @@ class BakeryItemCard extends StatelessWidget {
   final String name;
   final int calories;
   final String imagePath;
-  final void Function(String, int) onAdd;
+  final Function(String, int) onAdd;
 
 
   const BakeryItemCard({
@@ -550,7 +530,7 @@ class BakeryItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 160, // Added width constraint for consistency
+      width: 140, // Set a fixed width for each card in horizontal scroll
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -566,7 +546,7 @@ class BakeryItemCard extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Bakery Item Image
+
             SizedBox(
               height: 100,
               child: Image.asset(
@@ -582,7 +562,7 @@ class BakeryItemCard extends StatelessWidget {
 
             const SizedBox(height: 15),
 
-            // Bakery Item Name
+
             Text(
               name,
               style: const TextStyle(
@@ -591,8 +571,6 @@ class BakeryItemCard extends StatelessWidget {
                 color: Colors.black,
               ),
               textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
 
             const SizedBox(height: 4),
@@ -606,14 +584,13 @@ class BakeryItemCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF00C853),
+                    color: Color(0xFF009439),
                   ),
                 ),
 
                 GestureDetector(
                   onTap: () {
-                    // Call onAdd with the required parameters
-                    onAdd(name, calories);
+                    onAdd(name, calories);  // Trigger the onAdd callback with proper parameters
 
                     // Show a snackbar to confirm addition
                     ScaffoldMessenger.of(context).showSnackBar(

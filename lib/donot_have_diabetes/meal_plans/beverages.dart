@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'total_screen.dart';
 
 void main() async {
@@ -30,8 +31,17 @@ class BeveragesScreen extends StatelessWidget {
 
   // Function to add calorie to Firestore
   void _addCalorieToFirebase(String name, int calories) async {
-    final userId = 'user123'; // Replace with actual user ID
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    // Check if user is signed in
+    if (_auth.currentUser == null) {
+      print("Error: No authenticated user found");
+      return;
+    }
+
+    // Initialize userRef with the current user's document
+    DocumentReference userRef = _firestore.collection('users').doc(_auth.currentUser!.uid);
 
     try {
       // Get the current total calorie count for the user
@@ -39,11 +49,13 @@ class BeveragesScreen extends StatelessWidget {
       int totalCalories = 0;
 
       if (userDoc.exists) {
+        // Cast the document data to Map to access fields
+        final userData = userDoc.data() as Map<String, dynamic>?;
         // If user document exists, fetch total calories (or set to 0 if not present)
-        totalCalories = userDoc.data()?['total_calories'] ?? 0;
+        totalCalories = userData?['total_calories'] ?? 0;
       }
 
-      // Update the total calorie count by adding the beverage's calories
+      // Update the total calorie count by adding the vegetable's calories
       totalCalories += calories;
 
       // Save the updated total calorie count back to Firestore
@@ -51,11 +63,25 @@ class BeveragesScreen extends StatelessWidget {
         'total_calories': totalCalories,
       }, SetOptions(merge: true));
 
-      // Add a document in a subcollection for individual beverages
+      // Get current time to determine meal type
+      final now = DateTime.now();
+      final hour = now.hour;
+      String mealType = 'Snack';
+
+      if (hour >= 5 && hour < 11) {
+        mealType = 'Breakfast';
+      } else if (hour >= 11 && hour < 15) {
+        mealType = 'Lunch';
+      } else if (hour >= 17 && hour < 22) {
+        mealType = 'Dinner';
+      }
+
+      // Optionally: You can also add a document in a subcollection for individual vegetables
       await userRef.collection('beverage_calories').add({
         'name': name,
         'calories': calories,
         'timestamp': FieldValue.serverTimestamp(), // Adds a timestamp for the entry
+        'mealType': mealType,
       });
 
       print("Calories added successfully!");
@@ -63,6 +89,7 @@ class BeveragesScreen extends StatelessWidget {
       print("Error adding calories: $e");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +110,6 @@ class BeveragesScreen extends StatelessWidget {
                     child: const Icon(
                       Icons.arrow_back,
                       size: 30,
-                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -106,7 +132,6 @@ class BeveragesScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
 
@@ -152,7 +177,7 @@ class BeveragesScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -161,7 +186,7 @@ class BeveragesScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -169,7 +194,7 @@ class BeveragesScreen extends StatelessWidget {
 
                       // Low-Calorie Beverages Grid
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -177,7 +202,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Water',
                                 calories: 0,
-                                imagePath: 'assets/water.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/water-bottle.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -187,7 +212,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Black Coffee (Unsweetened)',
                                 calories: 2,
-                                imagePath: 'assets/black_coffee.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/black_coffee.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -197,7 +222,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Black Tea (Unsweetened)',
                                 calories: 1,
-                                imagePath: 'assets/black_tea.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/black-tea.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -207,7 +232,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Green Tea (Unsweetened)',
                                 calories: 1,
-                                imagePath: 'assets/green_tea.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/green-tea.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -217,7 +242,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Herbal Tea (Unsweetened)',
                                 calories: 2,
-                                imagePath: 'assets/herbal_tea.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/herbal-tea.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -227,7 +252,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Diet Soda (Artificially Sweetened)',
                                 calories: 5,
-                                imagePath: 'assets/herbal_tea.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/soda.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -245,7 +270,7 @@ class BeveragesScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -254,7 +279,7 @@ class BeveragesScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -262,7 +287,7 @@ class BeveragesScreen extends StatelessWidget {
 
                       // Moderate-Calorie Beverages Grid
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -270,7 +295,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Coconut Water (Unsweetened)',
                                 calories: 19,
-                                imagePath: 'assets/coconut_water.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/coconut.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -280,7 +305,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Soy Milk (Unsweetened)',
                                 calories: 33,
-                                imagePath: 'assets/soy_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/soy-milk.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -290,7 +315,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Almond Milk (Unsweetened)',
                                 calories: 15,
-                                imagePath: 'assets/almond_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/almond-milk.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -300,7 +325,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Orange Juice (Fresh)',
                                 calories: 45,
-                                imagePath: 'assets/orange_juice.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/orange-juice.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -318,7 +343,7 @@ class BeveragesScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -326,8 +351,7 @@ class BeveragesScreen extends StatelessWidget {
                         '(Above 50 kcal per 100ml)',
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+
                         ),
                       ),
 
@@ -335,7 +359,7 @@ class BeveragesScreen extends StatelessWidget {
 
                       // High-Calorie Beverages Grid
                       SizedBox(
-                        height: 200, // Set a fixed height for the horizontal scroll area
+                        height: 217, // Set a fixed height for the horizontal scroll area
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -343,7 +367,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Papaya Fruit Juice (Sweetened)',
                                 calories: 70,
-                                imagePath: 'assets/papaya_juice.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/papaya (1).png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -353,7 +377,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Chocolate Milk',
                                 calories: 85,
-                                imagePath: 'assets/chocolate_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/chocolate-milk.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -363,7 +387,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Strawberry Milkshake',
                                 calories: 150,
-                                imagePath: 'assets/strawberry_milkshake.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/strawberry_milkshake.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -373,7 +397,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Banana Smoothie',
                                 calories: 120,
-                                imagePath: 'assets/mango_smoothie.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/banana_smoothie.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -383,7 +407,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Mango Lassi',
                                 calories: 150,
-                                imagePath: 'assets/whole_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/mango_lassi.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -393,7 +417,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Beer',
                                 calories: 43,
-                                imagePath: 'assets/whole_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/beer.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -403,7 +427,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Wine (Red/White)',
                                 calories: 85,
-                                imagePath: 'assets/whole_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/wine.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -413,7 +437,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Whiskey',
                                 calories: 231,
-                                imagePath: 'assets/whole_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/whisky.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -423,7 +447,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Vodka',
                                 calories: 231,
-                                imagePath: 'assets/whole_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/vodka.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -433,7 +457,7 @@ class BeveragesScreen extends StatelessWidget {
                               BeverageCard(
                                 name: 'Margarita',
                                 calories: 250,
-                                imagePath: 'assets/whole_milk.png',
+                                imagePath: 'lib/donot_have_diabetes/meal_plans/meal_images/margarita.png',
                                 onAdd: (name, calories) {
                                   _addCalorieToFirebase(name, calories);
                                 },
@@ -468,44 +492,8 @@ class BeveragesScreen extends StatelessWidget {
             ),
 
             // Bottom Navigation Bar
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  NavBarItem(
-                    icon: Icons.menu_book,
-                    color: Colors.blue,
-                    isSelected: true,
-                  ),
-                  NavBarItem(
-                    icon: Icons.favorite,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.fitness_center,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                  NavBarItem(
-                    icon: Icons.person,
-                    color: Colors.black,
-                    isSelected: false,
-                  ),
-                ],
-              ),
-            ),
+
+
           ],
         ),
       ),
@@ -531,7 +519,7 @@ class BeverageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 160,
+      width: 140,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
