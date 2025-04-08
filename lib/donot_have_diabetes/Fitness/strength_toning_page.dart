@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
+
 
 class StrengthToningPage extends StatefulWidget {
   const StrengthToningPage({super.key});
@@ -21,21 +23,21 @@ class _StrengthToningPageState extends State<StrengthToningPage> {
     WorkoutVideo(
       title: 'Dumbbell Shoulder Press',
       duration: '4:30',
-      thumbnail: 'https://via.placeholder.com/300x200?text=Shoulder+Press',
+      thumbnail: 'assets/videos/Dumbbel Shoulder Press.mp4',
       description: 'Build strong shoulders with this compound movement',
       difficulty: 'Intermediate',
     ),
     WorkoutVideo(
       title: 'Bodyweight Squats',
       duration: '3:45',
-      thumbnail: 'https://via.placeholder.com/300x200?text=Squats',
+      thumbnail: 'assets/videos/bodyweight squat.mp4',
       description: 'Perfect your form with this lower body essential',
       difficulty: 'Beginner',
     ),
     WorkoutVideo(
       title: 'Push-up Variations',
       duration: '5:20',
-      thumbnail: 'https://via.placeholder.com/300x200?text=Push-ups',
+      thumbnail: 'assets/videos/bodyweight squat.mp4',
       description: 'Multiple variations to target different muscle groups',
       difficulty: 'All Levels',
     ),

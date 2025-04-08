@@ -1,7 +1,94 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz1.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/Quiz2.dart';
 import 'package:mybete_app/donot_have_diabetes/mind_relax/resources_screen.dart';
+
+class ResultModel {
+  final String level;
+  final String date;
+
+  ResultModel({required this.level, required this.date});
+
+  Map<String, dynamic> toJson() => {
+        'level': level,
+        'date': date,
+      };
+
+  factory ResultModel.fromJson(Map<String, dynamic> json) {
+    return ResultModel(
+      level: json['level'],
+      date: json['date'],
+    );
+  }
+}
+
+class ResultHistoryScreen extends StatefulWidget {
+  const ResultHistoryScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ResultHistoryScreen> createState() => _ResultHistoryScreenState();
+}
+
+class _ResultHistoryScreenState extends State<ResultHistoryScreen> {
+  List<ResultModel> _history = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> resultList = prefs.getStringList('result_history') ?? [];
+    setState(() {
+      _history = resultList
+          .map((e) => ResultModel.fromJson(json.decode(e)))
+          .toList();
+    });
+  }
+
+  Future<void> _deleteHistory(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _history.removeAt(index);
+      final updated = _history.map((e) => json.encode(e.toJson())).toList();
+      prefs.setStringList('result_history', updated);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Result History'),
+        backgroundColor: const Color(0xFF5EB7CF),
+      ),
+      body: _history.isEmpty
+          ? const Center(child: Text("No history yet."))
+          : ListView.builder(
+              itemCount: _history.length,
+              itemBuilder: (context, index) {
+                final item = _history[index];
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    title: Text("Depression Level: ${item.level}"),
+                    subtitle: Text("Date: ${item.date}"),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteHistory(index),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
 
 class ResultScreen extends StatelessWidget {
   final Map<String, String?> quiz1Answers;
@@ -13,36 +100,24 @@ class ResultScreen extends StatelessWidget {
     required this.quiz2Answers,
   }) : super(key: key);
 
-  // Calculate depression level based on answers
   String _calculateDepressionLevel() {
     int score = 0;
-
-    // Analyze mood from Quiz1
-    if (quiz1Answers['mood'] == 'Stressed' ||
-        quiz1Answers['mood'] == 'Anxious') {
+    if (quiz1Answers['mood'] == 'Stressed' || quiz1Answers['mood'] == 'Anxious') {
       score += 2;
     }
-
-    // Analyze stress level from Quiz1
     if (quiz1Answers['stressLevel'] == 'High') {
       score += 3;
     } else if (quiz1Answers['stressLevel'] == 'Medium') {
       score += 1;
     }
-
-    // Analyze sleep from Quiz2
     if (quiz2Answers['sleepHours'] == 'Less than 4 ') {
       score += 3;
     } else if (quiz2Answers['sleepHours'] == '4-6 ') {
       score += 2;
     }
-
-    // Analyze sleep quality from Quiz2
     if (quiz2Answers['wakeUpNight'] == 'Yes') {
       score += 2;
     }
-
-    // Determine level based on score
     if (score >= 6) {
       return 'High';
     } else if (score >= 3) {
@@ -52,7 +127,6 @@ class ResultScreen extends StatelessWidget {
     }
   }
 
-  // Get color based on depression level
   Color _getLevelColor(String level) {
     switch (level) {
       case 'High':
@@ -66,7 +140,6 @@ class ResultScreen extends StatelessWidget {
     }
   }
 
-  // Get recommendations based on depression level
   List<String> _getRecommendations(String level) {
     switch (level) {
       case 'High':
@@ -98,11 +171,24 @@ class ResultScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _saveResultToHistory(String level) async {
+    final prefs = await SharedPreferences.getInstance();
+    final history = prefs.getStringList('result_history') ?? [];
+    final result = ResultModel(
+      level: level,
+      date: DateTime.now().toLocal().toString().split('.').first,
+    );
+    history.add(json.encode(result.toJson()));
+    await prefs.setStringList('result_history', history);
+  }
+
   @override
   Widget build(BuildContext context) {
     final depressionLevel = _calculateDepressionLevel();
     final levelColor = _getLevelColor(depressionLevel);
     final recommendations = _getRecommendations(depressionLevel);
+
+    _saveResultToHistory(depressionLevel);
 
     return Scaffold(
       backgroundColor: const Color(0xFFC5EDFF),
@@ -119,7 +205,6 @@ class ResultScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Result Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -144,11 +229,9 @@ class ResultScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // Level Indicator
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 24),
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                         decoration: BoxDecoration(
                           color: levelColor.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(30),
@@ -163,10 +246,7 @@ class ResultScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 30),
-
-                      // Level Description
                       Text(
                         _getLevelDescription(depressionLevel),
                         textAlign: TextAlign.center,
@@ -178,10 +258,7 @@ class ResultScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Recommendations Section
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -230,10 +307,7 @@ class ResultScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Disclaimer
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -251,10 +325,7 @@ class ResultScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 30),
-
-                // Action Buttons
                 Row(
                   children: [
                     Expanded(
@@ -282,10 +353,7 @@ class ResultScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    
-
-// With this updated version:
+                    const SizedBox(width: 20),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
@@ -313,6 +381,30 @@ class ResultScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ResultHistoryScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade300,
+                          foregroundColor: Colors.black87,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'History',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -337,7 +429,6 @@ class ResultScreen extends StatelessWidget {
   }
 }
 
-// Extension to get darker color
 extension ColorExtension on Color {
   Color darker() {
     return Color.fromARGB(
