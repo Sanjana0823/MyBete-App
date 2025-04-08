@@ -36,7 +36,7 @@ class NavigationBarWidget extends StatelessWidget {
           case 3:
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()), // User Profile
+              MaterialPageRoute(builder: (context) => UserProfilePage()), // User Profile
             );
             break;
         }
