@@ -1,8 +1,6 @@
 
 # MyBete-App
 
-# mybete_app
-
 A new Flutter project.
 
 ## Getting Started
@@ -19,5 +17,3 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 <<<<<<< HEAD
 =======
->>>>>>> b75766a (Create flutter project and add flutter native splash)
->>>>>>> 70ee22e (Create new flutter project and add flutter native splash)
