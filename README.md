@@ -1,8 +1,6 @@
 
-<<<<<<< HEAD
 # MyBete-App
-=======
->>>>>>> 70ee22e (Create new flutter project and add flutter native splash)
+
 # mybete_app
 
 A new Flutter project.
